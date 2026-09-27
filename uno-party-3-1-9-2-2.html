@@ -1,0 +1,3314 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>UNO PARTY ONLINE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#E8433A">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="UNO PARTY">
+<link rel="manifest" id="manifestLink" href="">
+<link rel="icon" id="favIcon" href="">
+<link rel="apple-touch-icon" id="appleIcon" href="">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --red:#E8433A; --yellow:#F5B400; --green:#2FA84F; --blue:#2C7BE5;
+  --ink:#1F2430; --ink-soft:#5B6270; --bg:#FBF9F4; --card-bg:#FFFFFF;
+  --line:#E7E2D6; --shadow:0 6px 16px rgba(31,36,48,.08);
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Nunito',sans-serif;overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+h1,h2,h3,.brand{font-family:'Baloo 2',sans-serif}
+button{font-family:inherit;cursor:pointer;border:none}
+input{font-family:inherit}
+.screen{display:none;min-height:100%;width:100%;animation:fadeUp .35s ease}
+.screen.active{display:flex;flex-direction:column}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+
+/* ---------- HOME ---------- */
+#home{align-items:center;justify-content:center;text-align:center;padding:32px 20px;gap:18px;position:relative;overflow:hidden}
+.bg-blob{position:absolute;border-radius:50%;opacity:.16;filter:blur(2px)}
+.blob1{width:220px;height:220px;background:var(--yellow);top:-60px;left:-60px}
+.blob2{width:260px;height:260px;background:var(--blue);bottom:-80px;right:-70px}
+.brand{font-size:2.3rem;font-weight:800;color:var(--ink);line-height:1;z-index:1}
+.brand span:nth-child(1){color:var(--red)}
+.brand span:nth-child(2){color:var(--yellow)}
+.brand span:nth-child(3){color:var(--green)}
+.brand span:nth-child(4){color:var(--blue)}
+.tagline{color:var(--ink-soft);font-weight:700;font-size:1.05rem;z-index:1}
+.hero-cards{display:flex;gap:10px;margin:6px 0 10px;z-index:1}
+.hero-cards .uno-card{width:56px;height:82px;font-size:1.6rem;transform:rotate(var(--r));transition:transform .25s ease}
+.hero-cards .uno-card:hover{transform:rotate(0) translateY(-6px)}
+.home-actions{display:flex;flex-direction:column;gap:12px;width:100%;max-width:320px;z-index:1}
+.btn{padding:16px 20px;border-radius:16px;font-weight:800;font-size:1.05rem;transition:transform .12s ease, box-shadow .12s ease;box-shadow:var(--shadow)}
+.btn:active{transform:scale(.96)}
+.btn-primary{background:var(--red);color:#fff}
+.btn-secondary{background:#fff;color:var(--ink);border:2px solid var(--line)}
+.btn-block{width:100%}
+.link-muted{color:var(--ink-soft);font-weight:700;text-decoration:underline;background:none;font-size:.95rem;z-index:1}
+
+/* ---------- FORM SCREENS ---------- */
+.form-screen{padding:20px;gap:18px;max-width:420px;margin:0 auto;width:100%}
+.form-top{display:flex;align-items:center;gap:10px;padding-top:6px}
+.icon-btn{width:40px;height:40px;border-radius:12px;background:#fff;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+.form-title{font-size:1.4rem;font-weight:800}
+.field-label{font-weight:800;font-size:.9rem;color:var(--ink-soft);margin-bottom:6px;display:block}
+.field-input{width:100%;padding:14px 16px;border-radius:14px;border:2px solid var(--line);background:#fff;font-size:1rem;font-weight:700;color:var(--ink)}
+.field-input:focus{outline:none;border-color:var(--blue)}
+.player-count{display:flex;gap:10px}
+.count-opt{flex:1;padding:14px 8px;border-radius:14px;border:2px solid var(--line);background:#fff;font-weight:800;text-align:center;transition:.15s}
+.count-opt.selected{border-color:var(--green);background:rgba(47,168,79,.1);color:var(--green)}
+
+/* ---------- LOBBY ---------- */
+#lobby{padding:20px;gap:16px;max-width:480px;margin:0 auto;width:100%}
+.room-code-pill{align-self:center;background:#fff;border:2px dashed var(--blue);color:var(--blue);font-weight:800;padding:8px 18px;border-radius:999px;letter-spacing:1px}
+.player-slot{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#fff;border-radius:16px;padding:12px 14px;box-shadow:var(--shadow);border:2px solid transparent}
+.player-slot.empty{border:2px dashed var(--line);box-shadow:none;color:var(--ink-soft);font-weight:700}
+.avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:1.1rem;flex-shrink:0}
+.slot-info{flex:1;min-width:0}
+.slot-name{font-weight:800}
+.status-chip{font-size:.75rem;font-weight:800;padding:3px 10px;border-radius:999px}
+.chip-host{background:rgba(245,180,0,.18);color:#946b00}
+.chip-ready{background:rgba(47,168,79,.15);color:var(--green)}
+.lobby-actions{display:flex;gap:10px;margin-top:6px}
+
+/* ---------- GAME ---------- */
+#game{background:linear-gradient(180deg,#F1FBF3,#FBF9F4);min-height:100%}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;padding-top:calc(12px + env(safe-area-inset-top,0px))}
+.topbar-brand{font-weight:800;font-size:1rem}
+.topbar-room{font-weight:800;color:var(--ink-soft);font-size:.85rem;background:var(--bg);padding:4px 12px;border-radius:999px}
+.board{flex:1;display:flex;flex-direction:column;justify-content:space-between;padding:14px;gap:10px;overflow-x:hidden}
+.opponent-row{display:flex;flex-direction:column;align-items:center;gap:8px}
+.opponent-name{font-weight:800;font-size:.9rem;color:var(--ink-soft)}
+.opponent-cards{display:flex;gap:-10px}
+.mini-card{width:28px;height:40px;border-radius:6px;margin-left:-10px;box-shadow:0 2px 4px rgba(0,0,0,.15);border:2px solid #fff}
+.mini-card:first-child{margin-left:0}
+.mini-card.back{background:repeating-linear-gradient(45deg,var(--ink),var(--ink) 4px,#333 4px,#333 8px)}
+.turn-indicator{align-self:center;background:var(--ink);color:#fff;font-weight:800;padding:6px 18px;border-radius:999px;font-size:.85rem;animation:pulse 1.8s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.center-area{display:flex;align-items:center;justify-content:center;gap:22px;margin:8px 0}
+.uno-card{width:74px;height:108px;border-radius:14px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:2rem;color:#fff;position:relative;flex-shrink:0;transition:transform .15s ease}
+.uno-card:active{transform:scale(.94)}
+.uno-card.red{background:linear-gradient(160deg,#F2564C,var(--red))}
+.uno-card.yellow{background:linear-gradient(160deg,#FFCB3D,var(--yellow));color:#7a5600}
+.uno-card.green{background:linear-gradient(160deg,#3FC468,var(--green))}
+.uno-card.blue{background:linear-gradient(160deg,#4B93F1,var(--blue))}
+.uno-card.wild{background:conic-gradient(var(--red),var(--yellow),var(--green),var(--blue),var(--red))}
+.uno-card.back{background:repeating-linear-gradient(45deg,var(--ink),var(--ink) 6px,#333 6px,#333 12px)}
+.uno-card .oval{position:absolute;width:70%;height:88%;border:3px solid rgba(255,255,255,.55);border-radius:50%;transform:rotate(20deg)}
+.uno-card .val{z-index:1}
+.player-area{display:flex;flex-direction:column;gap:8px}
+.player-hand-row{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.hand-scroll{display:flex;gap:8px;overflow-x:auto;padding:6px 2px 10px;scrollbar-width:none}
+.hand-scroll::-webkit-scrollbar{display:none}
+.hand-scroll .uno-card{width:58px;height:86px;font-size:1.4rem}
+.uno-btn{width:64px;height:64px;border-radius:50%;background:var(--red);color:#fff;font-weight:800;font-size:.95rem;box-shadow:0 8px 18px rgba(232,67,58,.4);flex-shrink:0;align-self:center;transition:transform .12s}
+.uno-btn:active{transform:scale(.9)}
+
+/* ---------- CARD SYSTEM (Tahap 2) ---------- */
+.opponents-wrap{display:flex;flex-wrap:wrap;justify-content:center;gap:14px 22px}
+.opponent-name-row{display:flex;align-items:center;gap:6px;justify-content:center}
+.card-count{font-size:.72rem;color:var(--ink-soft);font-weight:700}
+.uno-card .corner{position:absolute;top:6px;left:8px;font-size:.7rem;font-weight:800;z-index:1}
+.uno-card .icon-sym{width:34%;height:34%}
+.uno-card.wild .val, .uno-card.wild .icon-sym{filter:drop-shadow(0 1px 2px rgba(0,0,0,.35))}
+.uno-card.back .brand-mini{color:#fff;font-weight:800;font-size:.55rem;text-align:center;line-height:1.1;letter-spacing:.5px;opacity:.85}
+.hand-scroll .uno-card{cursor:pointer}
+.hand-scroll .uno-card.selected{transform:translateY(-14px);box-shadow:0 10px 20px rgba(31,36,48,.28);outline:3px solid var(--ink)}
+.card-deal-anim{animation:dealIn .35s ease backwards}
+@keyframes dealIn{from{opacity:0;transform:translateY(24px) scale(.8)}to{opacity:1;transform:translateY(0) scale(1)}}
+.card-draw-anim{animation:drawIn .3s ease}
+@keyframes drawIn{from{opacity:0;transform:translateX(-30px) scale(.85)}to{opacity:1;transform:translateX(0) scale(1)}}
+.card-play-anim{animation:playOut .25s ease}
+@keyframes playOut{from{transform:scale(1.15) translateY(-14px)}to{transform:scale(1) translateY(0)}}
+.conn-bar{text-align:center;font-size:.72rem;font-weight:800;color:var(--ink-soft);padding:4px 0}
+.conn-bar.off{color:var(--red)}
+.lobby-hint{text-align:center;font-size:.8rem;font-weight:700;color:var(--ink-soft);min-height:1.2em}
+.status-chip.chip-off{background:rgba(232,67,58,.12);color:var(--red)}
+.color-pill{font-size:.7rem;font-weight:800;padding:3px 12px;border-radius:999px;color:#fff}
+.turn-hint{text-align:center;font-weight:800;font-size:.8rem;color:var(--ink-soft);min-height:1.2em}
+.disabled-zone{opacity:.45;pointer-events:none}
+.turn-timer{align-self:center;font-weight:800;font-size:.8rem;color:var(--ink-soft);min-height:1.2em}
+.turn-timer.low{color:var(--red)}
+.uno-challenge-btn{margin-top:2px;font-size:.68rem;font-weight:800;color:var(--red);background:rgba(232,67,58,.1);border-radius:999px;padding:4px 10px;min-height:28px}
+.superseded-overlay{position:fixed;inset:0;background:rgba(31,36,48,.92);color:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:24px;z-index:80}
+.superseded-overlay.active{display:flex}
+.color-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px}
+.color-opt{padding:22px 10px;border-radius:14px;font-weight:800;color:#fff;box-shadow:var(--shadow);font-size:1.05rem;transition:transform .12s ease, box-shadow .12s ease}
+.color-opt:active{transform:scale(.93)}
+@media (hover:hover){.color-opt:hover{transform:translateY(-2px);box-shadow:0 10px 20px rgba(31,36,48,.22)}}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;font-weight:700;font-size:.85rem;padding:10px 18px;border-radius:999px;opacity:0;transition:opacity .25s ease, transform .25s ease;z-index:60;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ---------- MODAL ---------- */
+.modal-overlay{position:fixed;inset:0;background:rgba(31,36,48,.45);display:none;align-items:flex-end;justify-content:center;z-index:50}
+.modal-overlay.active{display:flex}
+@media (min-width:600px){.modal-overlay.active{align-items:center}}
+.modal-sheet{background:#fff;border-radius:22px 22px 0 0;padding:22px 20px calc(22px + env(safe-area-inset-bottom,0px));width:100%;max-width:420px;max-height:88vh;overflow-y:auto;animation:slideUp .25s ease}
+@media (min-width:600px){.modal-sheet{border-radius:22px}}
+@keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-title{font-size:1.2rem;font-weight:800;margin:0 0 6px}
+.modal-body{color:var(--ink-soft);font-weight:600;margin:0 0 18px;line-height:1.5}
+.modal-actions{display:flex;gap:10px}
+
+@media (min-width:700px){
+  .brand{font-size:3rem}
+  #game .board{max-width:820px;margin:0 auto;width:100%}
+}
+:root:not([data-theme="light"]){}
+
+/* ---------- TAHAP 6 — POLISH ---------- */
+.btn.is-loading{position:relative;color:transparent !important;pointer-events:none}
+.btn.is-loading::after{content:"";position:absolute;left:50%;top:50%;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;border:3px solid rgba(255,255,255,.5);border-top-color:#fff;animation:spin .7s linear infinite}
+.btn-secondary.is-loading::after{border:3px solid rgba(31,36,48,.25);border-top-color:var(--ink)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn:disabled{opacity:.55;pointer-events:none}
+@media (hover:hover){.btn-primary:hover{filter:brightness(1.06);transform:translateY(-1px)}.btn-secondary:hover{border-color:var(--ink-soft)}.count-opt:hover{border-color:var(--ink-soft)}}
+@media (hover:hover){.hand-scroll .uno-card:not(.card-unplayable):hover{transform:translateY(-10px);box-shadow:0 12px 20px rgba(31,36,48,.22)}}
+
+.room-code-row{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
+.icon-mini-btn{background:#fff;border:2px solid var(--line);border-radius:999px;padding:6px 14px;font-weight:800;font-size:.78rem;display:inline-flex;align-items:center;gap:5px;transition:transform .12s ease}
+.icon-mini-btn:active{transform:scale(.94)}
+
+.crown{filter:drop-shadow(0 1px 1px rgba(0,0,0,.15))}
+.player-slot.enter-anim{animation:slotIn .3s ease backwards}
+@keyframes slotIn{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.status-chip.chip-online-dot{display:inline-flex;align-items:center;gap:4px}
+.dot-online{width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block}
+.dot-offline{width:7px;height:7px;border-radius:50%;background:var(--red);display:inline-block}
+
+.card-unplayable{opacity:.4;filter:grayscale(.35)}
+.hand-scroll .uno-card{will-change:transform}
+
+.uno-btn{position:relative}
+.uno-btn.urgent{animation:unoPulse 1s ease-in-out infinite}
+@keyframes unoPulse{0%,100%{box-shadow:0 8px 18px rgba(232,67,58,.4);transform:scale(1)}50%{box-shadow:0 8px 26px rgba(232,67,58,.75);transform:scale(1.08)}}
+.uno-btn.said::after{content:"✓";position:absolute;top:-4px;right:-4px;background:var(--green);color:#fff;border-radius:50%;width:20px;height:20px;font-size:.7rem;display:flex;align-items:center;justify-content:center;border:2px solid #fff}
+
+.fx-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:70}
+.fx-badge{font-family:'Baloo 2',sans-serif;font-weight:800;color:#fff;padding:14px 30px;border-radius:20px;font-size:2rem;box-shadow:0 10px 30px rgba(0,0,0,.35);animation:fxPop .7s ease forwards}
+@keyframes fxPop{0%{opacity:0;transform:scale(.5) rotate(-6deg)}15%{opacity:1;transform:scale(1.12) rotate(2deg)}30%{transform:scale(1) rotate(0)}80%{opacity:1}100%{opacity:0;transform:scale(1.1)}}
+.confetti-piece{position:fixed;top:-20px;width:9px;height:14px;border-radius:2px;animation:confettiFall linear forwards;z-index:69}
+@keyframes confettiFall{to{transform:translateY(110vh) rotate(540deg);opacity:.2}}
+@media (prefers-reduced-motion:reduce){.fx-badge,.confetti-piece,.uno-btn.urgent,.card-deal-anim,.card-draw-anim,.card-play-anim{animation:none !important}}
+
+.sound-toggle{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:10px;z-index:6;background:#fff;border:2px solid var(--line);border-radius:999px;padding:6px 12px;font-weight:800;font-size:.78rem;box-shadow:var(--shadow)}
+#home .sound-toggle{position:absolute}
+
+.win-list{display:flex;flex-direction:column;gap:8px;margin:14px 0;text-align:left}
+.win-row{display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:12px;padding:8px 12px}
+.win-row .avatar{width:32px;height:32px;font-size:.85rem}
+.win-row .wname{flex:1;font-weight:800;font-size:.9rem}
+.win-row .wcount{font-weight:700;font-size:.78rem;color:var(--ink-soft)}
+.win-row.champ{background:rgba(245,180,0,.15)}
+
+@media (max-width:360px){
+  .uno-card{width:64px;height:94px}
+  .hand-scroll .uno-card{width:50px;height:76px;font-size:1.2rem}
+  .brand{font-size:1.9rem}
+}
+@media (min-width:900px){
+  .hand-scroll .uno-card{width:68px;height:100px;font-size:1.55rem}
+  .uno-card{width:82px;height:120px;font-size:2.1rem}
+}
+
+/* ---------- TAHAP 7 — SETTINGS / PWA / ACCESSIBILITY / RELIABILITY ---------- */
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+button,.field-input,.count-opt{min-height:44px}
+.icon-btn,.icon-mini-btn{min-height:40px;min-width:40px}
+
+#splash{position:fixed;inset:0;background:linear-gradient(160deg,#FBF9F4,#FDF3E3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;z-index:200;transition:opacity .35s ease}
+#splash.hide{opacity:0;pointer-events:none}
+#splash .brand{font-size:2.1rem}
+#splash .tagline{color:var(--ink-soft);font-weight:700}
+.splash-spinner{width:34px;height:34px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--red);animation:spin .8s linear infinite;margin-top:6px}
+
+.offline-banner{position:fixed;top:0;left:0;right:0;background:var(--ink);color:#fff;text-align:center;font-weight:800;font-size:.82rem;padding:10px 14px calc(10px + env(safe-area-inset-top,0px));z-index:90;display:none}
+.offline-banner.show{display:block}
+.offline-banner .sub{font-weight:600;opacity:.8;font-size:.75rem;display:block;margin-top:2px}
+.offline-banner button{margin-top:6px;background:#fff;color:var(--ink);border-radius:999px;padding:6px 16px;font-weight:800;font-size:.78rem}
+
+.settings-btn{background:#fff;border:2px solid var(--line);border-radius:12px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+.set-section{margin-bottom:16px}
+.set-title{font-weight:800;font-size:.82rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.set-row:last-child{border-bottom:none}
+.set-label{font-weight:700;font-size:.95rem}
+.switch{position:relative;width:46px;height:26px;flex-shrink:0}
+.switch input{opacity:0;width:100%;height:100%;margin:0;position:absolute;cursor:pointer}
+.switch .track{position:absolute;inset:0;background:var(--line);border-radius:999px;transition:.15s}
+.switch .thumb{position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:.15s}
+.switch input:checked + .track{background:var(--green)}
+.switch input:checked + .track .thumb{transform:translateX(20px)}
+.switch input:focus-visible + .track{outline:3px solid var(--blue);outline-offset:2px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{flex:1;min-width:80px;padding:9px 8px;border-radius:10px;border:2px solid var(--line);background:#fff;font-weight:800;font-size:.8rem}
+.seg button.active{border-color:var(--blue);background:rgba(44,123,229,.1);color:var(--blue)}
+.vol-row{display:flex;align-items:center;gap:10px}
+.vol-row input[type=range]{flex:1;accent-color:var(--red);min-height:auto}
+.vol-val{font-weight:800;font-size:.82rem;color:var(--ink-soft);width:38px;text-align:right}
+
+.skeleton{background:linear-gradient(90deg,#eee 25%,#f5f5f5 37%,#eee 63%);background-size:400% 100%;animation:sk 1.4s ease infinite;border-radius:12px}
+@keyframes sk{0%{background-position:100% 0}100%{background-position:0 0}}
+.skeleton-slot{height:64px;margin-bottom:10px}
+.empty-state{text-align:center;color:var(--ink-soft);font-weight:700;padding:14px;font-size:.9rem;line-height:1.5}
+
+.recovery-screen{align-items:center;justify-content:center;text-align:center;gap:14px;padding:32px 20px}
+
+@media (prefers-reduced-motion:reduce){#splash{transition:none}.splash-spinner{animation:none;border-top-color:var(--line)}}
+html.anim-off *{animation:none !important;transition:none !important}
+html.anim-reduced .confetti-piece,html.anim-reduced .fx-badge{animation-duration:.01s !important}
+
+/* ---------- TAHAP 8 — AKUN / PROFIL ---------- */
+.home-account{display:flex;align-items:center;gap:8px;z-index:1;flex-wrap:wrap;justify-content:center}
+.account-chip{display:flex;align-items:center;gap:8px;background:#fff;border:2px solid var(--line);border-radius:999px;padding:5px 14px 5px 5px;box-shadow:var(--shadow);font-weight:800;color:var(--ink);font-size:.92rem}
+.account-chip .avatar{width:30px;height:30px;font-size:1rem}
+.pw-field{position:relative}
+.pw-field .field-input{padding-right:46px}
+.pw-toggle{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;font-size:1.05rem;padding:6px;min-height:32px;min-width:32px;border-radius:8px}
+.avatar-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.avatar-opt{aspect-ratio:1;border-radius:14px;border:2px solid var(--line);background:#fff;font-size:1.5rem;display:flex;align-items:center;justify-content:center;transition:.15s}
+.avatar-opt.selected{border-color:var(--blue);background:rgba(44,123,229,.1)}
+.profile-card{display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 0 20px}
+.profile-avatar-big{width:84px;height:84px;font-size:2.2rem}
+.profile-name{font-weight:800;font-size:1.25rem;margin-top:6px}
+.profile-username{color:var(--ink-soft);font-weight:700}
+.profile-joined{color:var(--ink-soft);font-weight:600;font-size:.8rem;margin-top:2px}
+.field-hint{font-size:.78rem;color:var(--ink-soft);font-weight:600;margin-top:4px}
+.auth-switch{text-align:center;font-weight:700;color:var(--ink-soft);font-size:.92rem}
+.opp-avatar{width:32px;height:32px;font-size:.85rem;margin-bottom:2px}
+
+/* ---------- TAHAP 9 — FRIEND SYSTEM, INVITE & SOCIAL PLAY ---------- */
+.friend-tab-btn{padding:10px 6px;border-radius:12px;background:#fff;border:2px solid var(--line);font-weight:800;color:var(--ink-soft);font-size:.85rem}
+.friend-tab-btn.active{border-color:var(--blue);color:var(--blue);background:rgba(44,123,229,.08)}
+.notif-badge{display:inline-flex;align-items:center;justify-content:center;background:var(--red);color:#fff;font-size:.65rem;font-weight:800;border-radius:999px;padding:1px 6px;min-width:16px;text-align:center;line-height:1.4}
+
+/* ===== TAHAP 11 — VOICE CHAT (layer komunikasi terpisah, tidak menyentuh game engine) ===== */
+.voice-fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:40;background:var(--ink);color:#fff;border-radius:999px;padding:12px 16px;font-weight:800;font-size:1rem;box-shadow:0 8px 20px rgba(31,36,48,.25);display:none;align-items:center;gap:6px}
+.voice-fab.live{background:var(--green)}
+.voice-fab-count{background:rgba(255,255,255,.25);border-radius:999px;padding:1px 8px;font-size:.75rem}
+.voice-mode-badge{font-size:.65rem;font-weight:800;background:rgba(255,255,255,.18);color:#fff;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.voice-status-row{color:var(--ink-soft);font-weight:700;font-size:.9rem;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.voice-status-row .dot{width:9px;height:9px;border-radius:50%;background:var(--ink-soft);flex-shrink:0}
+.voice-status-row.on .dot{background:var(--green)}
+.voice-status-row.connecting .dot{background:var(--yellow)}
+.voice-status-row.error .dot{background:var(--red)}
+.voice-controlbar{display:flex;gap:8px;margin-bottom:14px}
+.voice-ctrl-btn{flex:1;padding:12px 6px;border-radius:14px;background:#F3F1E9;font-weight:800;font-size:.85rem;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--ink)}
+.voice-ctrl-btn .ico{font-size:1.2rem}
+.voice-ctrl-btn.active{background:var(--green);color:#fff}
+.voice-ctrl-btn.muted{background:rgba(232,67,58,.12);color:var(--red)}
+.voice-opponent-box{background:#F3F1E9;border-radius:14px;padding:12px;margin-bottom:14px;text-align:center}
+.voice-opponent-box .lbl{font-weight:700;color:var(--ink-soft);font-size:.8rem;margin-bottom:8px}
+.voice-player-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;max-height:32vh;overflow-y:auto}
+.voice-player-row{display:flex;align-items:center;gap:10px;padding:8px;border-radius:12px;background:#F9F7F1}
+.voice-player-row .avatar{width:36px;height:36px;font-size:.9rem}
+.voice-player-row .avatar.speaking-ring{box-shadow:0 0 0 3px var(--green)}
+.voice-p-name{flex:1;min-width:0;font-weight:700;font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.voice-p-sub{font-size:.72rem;color:var(--ink-soft);font-weight:700}
+.voice-p-mic{font-size:1.1rem;width:26px;text-align:center;flex-shrink:0}
+.voice-p-vol{width:64px;flex-shrink:0}
+.voice-mute-btn{border-radius:8px;background:#fff;border:1.5px solid var(--line);font-size:.7rem;font-weight:800;padding:5px 8px;flex-shrink:0}
+.voice-mute-btn.on{background:rgba(232,67,58,.12);color:var(--red);border-color:transparent}
+.opponent-row .avatar.speaking-ring,.player-hand-row .avatar.speaking-ring{box-shadow:0 0 0 3px var(--green)}
+#myLabel.speaking-ring{outline:2px solid var(--green);outline-offset:3px;border-radius:8px}
+
+/* ---------- TAHAP 10 — STATISTIK, LEADERBOARD, RIWAYAT & ACHIEVEMENT ---------- */
+.stats-section{margin-top:10px}
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.stat-box{background:#fff;border:2px solid var(--line);border-radius:14px;padding:12px 10px;text-align:center}
+.stat-box .stat-val{font-weight:800;font-size:1.35rem;color:var(--ink)}
+.stat-box .stat-label{font-weight:700;font-size:.72rem;color:var(--ink-soft);margin-top:2px}
+.stat-winrate{grid-column:span 2;background:linear-gradient(160deg,rgba(47,168,79,.12),rgba(47,168,79,.04))}
+.stat-winrate .stat-val{color:var(--green)}
+
+.ach-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:6px}
+.ach-badge{background:#fff;border:2px solid var(--line);border-radius:14px;padding:10px 6px;text-align:center;opacity:.4}
+.ach-badge.unlocked{opacity:1;border-color:var(--yellow);background:rgba(245,180,0,.08)}
+.ach-badge .ach-icon{font-size:1.6rem}
+.ach-badge .ach-name{font-weight:800;font-size:.66rem;margin-top:4px;line-height:1.2}
+
+.lb-row{display:flex;align-items:center;gap:10px;background:#fff;border-radius:16px;padding:10px 14px;box-shadow:var(--shadow)}
+.lb-row.me{border:2px solid var(--blue)}
+.lb-rank{font-weight:800;font-size:1rem;color:var(--ink-soft);width:26px;text-align:center;flex-shrink:0}
+.lb-info{flex:1;min-width:0}
+.lb-name{font-weight:800}
+.lb-sub{font-size:.75rem;color:var(--ink-soft);font-weight:700}
+.lb-wins{font-weight:800;color:var(--green);text-align:right}
+.lb-wins small{display:block;font-weight:700;color:var(--ink-soft);font-size:.7rem}
+.my-rank-pill{align-self:center;background:var(--ink);color:#fff;font-weight:800;padding:8px 18px;border-radius:999px;font-size:.85rem;text-align:center}
+
+.mh-row{background:#fff;border-radius:16px;padding:12px 14px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px}
+.mh-row:active{transform:scale(.98)}
+.mh-result{font-weight:800;font-size:.78rem;padding:4px 10px;border-radius:999px;flex-shrink:0}
+.mh-result.win{background:rgba(47,168,79,.15);color:var(--green)}
+.mh-result.loss{background:rgba(232,67,58,.12);color:var(--red)}
+.mh-info{flex:1;min-width:0}
+.mh-date{font-weight:700;color:var(--ink-soft);font-size:.78rem}
+.mh-sub{font-weight:800;font-size:.9rem}
+.mh-chevron{color:var(--ink-soft)}
+
+.md-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.md-row:last-child{border-bottom:none}
+.md-pos{font-weight:800;width:26px;text-align:center;color:var(--ink-soft)}
+.md-name{flex:1;font-weight:700}
+.md-cards{font-weight:700;color:var(--ink-soft);font-size:.85rem}
+.md-summary{display:flex;justify-content:space-around;text-align:center;margin:4px 0 14px}
+.md-summary div{font-weight:800;font-size:.8rem;color:var(--ink-soft)}
+.md-summary strong{display:block;font-size:1.05rem;color:var(--ink);margin-top:2px}
+</style>
+</head>
+<body>
+
+<div id="splash">
+  <h1 class="brand"><span>U</span><span>N</span><span>O</span> <span>PARTY</span></h1>
+  <p class="tagline">Main UNO bareng teman, kapan saja.</p>
+  <div class="splash-spinner" aria-hidden="true"></div>
+</div>
+
+<div class="offline-banner" id="offlineBanner" role="status">
+  Tidak ada koneksi internet
+  <span class="sub">Game multiplayer membutuhkan koneksi internet.</span>
+  <br><button onclick="location.reload()">Coba Lagi</button>
+</div>
+
+<!-- HOME -->
+<section id="home" class="screen active">
+  <div class="bg-blob blob1"></div>
+  <div class="bg-blob blob2"></div>
+  <button class="sound-toggle" id="soundToggleBtn" onclick="toggleSound()" aria-label="Aktif/nonaktifkan suara">🔊 Suara: ON</button>
+  <button class="settings-btn" style="position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:10px" onclick="openModal('settings')" aria-label="Buka pengaturan">⚙️</button>
+  <h1 class="brand"><span>U</span><span>N</span><span>O</span> <span>PARTY</span></h1>
+  <p class="tagline">Main UNO bareng teman, kapan saja.</p>
+  <div id="homeAccountArea" class="home-account"></div>
+  <div class="hero-cards">
+    <div class="uno-card red" style="--r:-10deg"><span class="oval"></span><span class="val">5</span></div>
+    <div class="uno-card yellow" style="--r:5deg"><span class="oval"></span><span class="val">8</span></div>
+    <div class="uno-card blue" style="--r:16deg"><span class="oval"></span><span class="val">2</span></div>
+  </div>
+  <div class="home-actions">
+    <button class="btn btn-primary btn-block" onclick="go('createRoom')">Buat Room</button>
+    <button class="btn btn-secondary btn-block" onclick="go('joinRoom')">Gabung Room</button>
+    <button class="btn btn-secondary btn-block" style="position:relative" onclick="go('friends')">👥 Teman<span id="friendBadge" class="notif-badge" style="display:none;position:absolute;top:-6px;right:10px"></span></button>
+    <button class="btn btn-secondary btn-block" onclick="goLeaderboard()">🏆 Leaderboard</button>
+  </div>
+  <button class="link-muted" onclick="openModal('howto')">Cara Bermain</button>
+</section>
+
+<!-- CREATE ROOM -->
+<section id="createRoom" class="screen">
+  <div class="form-screen">
+    <div class="form-top">
+      <button class="icon-btn" onclick="go('home')" aria-label="Kembali">←</button>
+      <span class="form-title">Buat Room</span>
+    </div>
+    <div>
+      <label class="field-label" for="createName">Nama Pemain</label>
+      <input class="field-input" placeholder="Masukkan nama kamu" id="createName">
+    </div>
+    <div>
+      <label class="field-label">Mode Permainan</label>
+      <div class="player-count" id="createModeGroup">
+        <button class="count-opt selected" onclick="selectGameMode(this,'normal')">Normal</button>
+        <button class="count-opt" onclick="selectGameMode(this,'team')">2 VS 2 Team</button>
+        <button class="count-opt" onclick="selectGameMode(this,'persaudaraan')">Persaudaraan</button>
+      </div>
+    </div>
+    <div id="createCountWrap">
+      <label class="field-label" id="createCountLabel">Jumlah Pemain</label>
+      <div class="player-count" id="createCount">
+        <button class="count-opt" onclick="selectCount(this,'createCount',2)">2 Pemain</button>
+        <button class="count-opt" onclick="selectCount(this,'createCount',3)">3 Pemain</button>
+        <button class="count-opt selected" onclick="selectCount(this,'createCount',4)">4 Pemain</button>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-block" id="createBtn" onclick="createRoomFlow()">Buat Room</button>
+    <button class="btn btn-secondary btn-block" onclick="go('home')">Kembali</button>
+  </div>
+</section>
+
+<!-- JOIN ROOM -->
+<section id="joinRoom" class="screen">
+  <div class="form-screen">
+    <div class="form-top">
+      <button class="icon-btn" onclick="go('home')" aria-label="Kembali">←</button>
+      <span class="form-title">Gabung Room</span>
+    </div>
+    <div>
+      <label class="field-label" for="joinName">Nama Pemain</label>
+      <input class="field-input" placeholder="Masukkan nama kamu" id="joinName">
+    </div>
+    <div>
+      <label class="field-label" for="joinCode">Kode Room</label>
+      <input class="field-input" placeholder="Contoh: ABC123" style="text-transform:uppercase" id="joinCode" maxlength="6">
+    </div>
+    <button class="btn btn-primary btn-block" id="joinBtn" onclick="joinRoomFlow()">Gabung Room</button>
+    <button class="btn btn-secondary btn-block" onclick="go('home')">Kembali</button>
+    <div class="auth-switch" id="joinAccountHint"></div>
+  </div>
+</section>
+
+<!-- LOGIN -->
+<section id="login" class="screen">
+  <div class="form-screen">
+    <div class="form-top">
+      <button class="icon-btn" onclick="go('home')" aria-label="Kembali">←</button>
+      <span class="form-title">Masuk ke UNO PARTY</span>
+    </div>
+    <div>
+      <label class="field-label" for="loginEmail">Username / Email</label>
+      <input class="field-input" placeholder="email@contoh.com" id="loginEmail" type="email" autocomplete="username">
+    </div>
+    <div>
+      <label class="field-label" for="loginPassword">Password</label>
+      <div class="pw-field">
+        <input class="field-input" placeholder="Password" id="loginPassword" type="password" autocomplete="current-password">
+        <button type="button" class="pw-toggle" onclick="togglePw('loginPassword')" aria-label="Tampilkan atau sembunyikan password">👁️</button>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-block" id="loginBtn" onclick="loginFlow()">Masuk</button>
+    <button class="link-muted" onclick="openModal('forgotPassword')">Lupa Password?</button>
+    <div class="auth-switch">Belum punya akun? <button class="link-muted" style="text-decoration:underline" onclick="go('register')">Daftar</button></div>
+    <button class="btn btn-secondary btn-block" onclick="go('home')">Kembali</button>
+  </div>
+</section>
+
+<!-- REGISTER -->
+<section id="register" class="screen">
+  <div class="form-screen">
+    <div class="form-top">
+      <button class="icon-btn" onclick="go('home')" aria-label="Kembali">←</button>
+      <span class="form-title">Buat Akun</span>
+    </div>
+    <div>
+      <label class="field-label" for="regUsername">Username</label>
+      <input class="field-input" id="regUsername" maxlength="16" placeholder="cth. gufron123" autocomplete="username">
+      <div class="field-hint">3–16 karakter: huruf, angka, underscore.</div>
+    </div>
+    <div>
+      <label class="field-label" for="regDisplayName">Nama Pemain</label>
+      <input class="field-input" id="regDisplayName" maxlength="20" placeholder="cth. Gufron">
+    </div>
+    <div>
+      <label class="field-label" for="regEmail">Email</label>
+      <input class="field-input" id="regEmail" type="email" placeholder="email@contoh.com" autocomplete="email">
+    </div>
+    <div>
+      <label class="field-label" for="regPassword">Password</label>
+      <div class="pw-field">
+        <input class="field-input" id="regPassword" type="password" autocomplete="new-password">
+        <button type="button" class="pw-toggle" onclick="togglePw('regPassword')" aria-label="Tampilkan atau sembunyikan password">👁️</button>
+      </div>
+      <div class="field-hint">Minimal 6 karakter.</div>
+    </div>
+    <div>
+      <label class="field-label" for="regConfirm">Konfirmasi Password</label>
+      <div class="pw-field">
+        <input class="field-input" id="regConfirm" type="password" autocomplete="new-password">
+        <button type="button" class="pw-toggle" onclick="togglePw('regConfirm')" aria-label="Tampilkan atau sembunyikan password">👁️</button>
+      </div>
+    </div>
+    <div>
+      <label class="field-label">Avatar</label>
+      <div class="avatar-grid" id="registerAvatarGrid"></div>
+    </div>
+    <button class="btn btn-primary btn-block" id="registerBtn" onclick="registerFlow()">Daftar</button>
+    <div class="auth-switch">Sudah punya akun? <button class="link-muted" style="text-decoration:underline" onclick="go('login')">Masuk</button></div>
+    <button class="btn btn-secondary btn-block" onclick="go('home')">Kembali</button>
+  </div>
+</section>
+
+<!-- PROFILE -->
+<section id="profile" class="screen">
+  <div class="form-screen">
+    <div class="form-top">
+      <button class="icon-btn" onclick="go('home')" aria-label="Kembali">←</button>
+      <span class="form-title">Profil Saya</span>
+    </div>
+    <div class="profile-card">
+      <div class="avatar profile-avatar-big" id="profileAvatar" style="background:var(--blue)"></div>
+      <div class="profile-name" id="profileDisplayName"></div>
+      <div class="profile-username" id="profileUsername"></div>
+      <div class="profile-joined" id="profileJoined"></div>
+    </div>
+    <div class="stats-section">
+      <div class="field-label" style="margin-bottom:8px">Statistik</div>
+      <div class="stats-grid" id="statsGrid"><div class="skeleton skeleton-slot" style="grid-column:span 2"></div></div>
+    </div>
+    <div class="stats-section">
+      <div class="field-label" style="margin-bottom:8px">Achievement</div>
+      <div class="ach-grid" id="achGrid"></div>
+    </div>
+    <button class="btn btn-secondary btn-block" onclick="go('matchHistory')">🕓 Riwayat Pertandingan</button>
+    <button class="btn btn-secondary btn-block" onclick="openEditProfile()">Edit Profil</button>
+    <button class="btn btn-secondary btn-block" onclick="openModal('settings')">Pengaturan</button>
+    <button class="btn btn-primary btn-block" style="background:var(--red)" onclick="requestLogout()">Keluar Akun</button>
+  </div>
+</section>
+
+<!-- FRIENDS (TAHAP 9) -->
+<section id="friends" class="screen">
+  <div class="form-screen" style="max-width:480px">
+    <div class="form-top">
+      <button class="icon-btn" onclick="go('home')" aria-label="Kembali">←</button>
+      <span class="form-title">Teman</span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="friend-tab-btn active" data-tab="list" onclick="switchFriendTab('list')" style="flex:1">Teman Saya</button>
+      <button class="friend-tab-btn" data-tab="search" onclick="switchFriendTab('search')" style="flex:1">Cari Pemain</button>
+      <button class="friend-tab-btn" data-tab="requests" onclick="switchFriendTab('requests')" style="flex:1;position:relative">Permintaan<span id="friendReqTabBadge" class="notif-badge" style="display:none;position:absolute;top:-6px;right:2px"></span></button>
+    </div>
+    <div class="friend-tab-panel" data-tab="list" id="friendListPanel">
+      <div id="friendListWrap" style="display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+    <div class="friend-tab-panel" data-tab="search" id="friendSearchPanel" style="display:none">
+      <input class="field-input" id="friendSearchInput" placeholder="Cari username atau nama pemain..." oninput="onFriendSearchInput()">
+      <div id="friendSearchWrap" style="display:flex;flex-direction:column;gap:10px;margin-top:12px"></div>
+    </div>
+    <div class="friend-tab-panel" data-tab="requests" id="friendReqPanel" style="display:none">
+      <div id="friendReqWrap" style="display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+  </div>
+</section>
+
+<!-- LEADERBOARD (TAHAP 10) -->
+<section id="leaderboard" class="screen">
+  <div class="form-screen" style="max-width:480px">
+    <div class="form-top">
+      <button class="icon-btn" onclick="go('home')" aria-label="Kembali">←</button>
+      <span class="form-title">Leaderboard</span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="friend-tab-btn active" data-lbtab="global" onclick="switchLeaderboardTab('global')" style="flex:1">Global</button>
+      <button class="friend-tab-btn" data-lbtab="friends" onclick="switchLeaderboardTab('friends')" style="flex:1">Teman</button>
+    </div>
+    <div class="my-rank-pill" id="myRankPill" style="display:none"></div>
+    <div id="leaderboardWrap" style="display:flex;flex-direction:column;gap:10px"></div>
+  </div>
+</section>
+
+<!-- RIWAYAT PERTANDINGAN (TAHAP 10) -->
+<section id="matchHistory" class="screen">
+  <div class="form-screen" style="max-width:480px">
+    <div class="form-top">
+      <button class="icon-btn" onclick="go('profile')" aria-label="Kembali">←</button>
+      <span class="form-title">Riwayat Pertandingan</span>
+    </div>
+    <div id="matchHistoryWrap" style="display:flex;flex-direction:column;gap:10px"></div>
+  </div>
+</section>
+
+<!-- LOBBY -->
+<section id="lobby" class="screen">
+  <div id="lobby-inner">
+    <div class="form-top" style="max-width:480px;margin:0 auto;width:100%">
+      <button class="icon-btn" onclick="leaveRoom()" aria-label="Keluar dari room">←</button>
+      <span class="form-title">Lobby</span>
+    </div>
+    <div class="room-code-row">
+      <div class="room-code-pill" id="lobbyRoomCode">ROOM: ----</div>
+      <button class="icon-mini-btn" onclick="copyRoomCode()" aria-label="Salin kode room">📋 Salin</button>
+      <button class="icon-mini-btn" id="shareBtn" onclick="shareRoom()" aria-label="Bagikan room">🔗 Bagikan</button>
+      <button class="icon-mini-btn" onclick="openInviteFromLobby()" aria-label="Undang teman">👥 Undang Teman</button>
+    </div>
+    <div id="playerSlots" style="display:flex;flex-direction:column;gap:10px"></div>
+    <div class="lobby-hint" id="lobbyHint"></div>
+    <div class="lobby-actions">
+      <button class="btn btn-secondary btn-block" id="readyBtn" onclick="toggleReadyClick()">Siap</button>
+      <button class="btn btn-primary btn-block" id="startBtn" onclick="startGame()">Mulai Game</button>
+    </div>
+  </div>
+</section>
+
+<!-- SESSION RECOVERY -->
+<section id="recovery" class="screen">
+  <div class="recovery-screen" style="display:flex;flex-direction:column;min-height:100%">
+    <div class="splash-spinner" id="recoverySpinner" aria-hidden="true"></div>
+    <h3 class="form-title" id="recoveryTitle">Memulihkan permainan...</h3>
+    <p class="lobby-hint" id="recoverySub">Menghubungkan ke room sebelumnya.</p>
+    <button class="btn btn-primary" id="recoveryHomeBtn" style="display:none" onclick="go('home')">Kembali ke Beranda</button>
+  </div>
+</section>
+
+<!-- GAME -->
+<section id="game" class="screen">
+  <div class="topbar">
+    <span class="topbar-brand">UNO PARTY</span>
+    <span class="topbar-room" id="topRoomCode">ABC123</span>
+    <span class="voice-mode-badge" id="voiceModeBadge" style="display:none"></span>
+    <div style="display:flex;gap:6px">
+      <button class="icon-btn" onclick="openModal('settings')" aria-label="Pengaturan">⚙️</button>
+      <button class="icon-btn" onclick="requestExitGame()" aria-label="Menu keluar">☰</button>
+    </div>
+  </div>
+  <div class="conn-bar" id="connBar">● Terhubung</div>
+  <div class="board">
+    <div>
+      <div class="opponents-wrap" id="opponentsWrap"></div>
+      <div class="turn-indicator" id="turnIndicator" style="margin-top:10px">Giliran Kamu</div>
+      <div class="turn-timer" id="turnTimer"></div>
+    </div>
+    <div class="center-area">
+      <div class="uno-card back" id="drawPileCard" onclick="drawOneCardMultiplayer()"><span class="brand-mini">UNO<br>PARTY</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+        <div id="discardPileCard"></div>
+        <span class="color-pill" id="colorPill"></span>
+      </div>
+    </div>
+    <div class="player-area">
+      <div class="player-hand-row">
+        <span style="font-weight:800;color:var(--ink-soft);font-size:.85rem;padding-left:2px" id="myLabel">Kamu · <span id="myCount">0</span> kartu</span>
+        <button class="uno-btn" id="unoBtn" onclick="callUnoMultiplayer()">UNO!</button>
+      </div>
+      <div class="hand-scroll" id="handCards"></div>
+      <div class="turn-hint" id="turnHint"></div>
+    </div>
+  </div>
+</section>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-exit" role="dialog" aria-modal="true" aria-labelledby="exitTitle">
+  <div class="modal-sheet">
+    <h3 class="modal-title" id="exitTitle">Keluar dari Room?</h3>
+    <p class="modal-body">Jika kamu keluar, kamu mungkin kehilangan posisi dalam permainan.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary btn-block" onclick="closeModal('exit')">Tetap Bermain</button>
+      <button class="btn btn-primary btn-block" onclick="closeModal('exit');leaveRoom()">Keluar</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-howto" role="dialog" aria-modal="true" aria-labelledby="howtoTitle">
+  <div class="modal-sheet">
+    <h3 class="modal-title" id="howtoTitle">Cara Bermain UNO</h3>
+    <p class="modal-body">Aturan lengkap akan ditambahkan pada tahap berikutnya. Untuk sekarang, jelajahi dulu alur Buat Room, Gabung Room, Lobby, hingga papan permainannya.</p>
+    <button class="btn btn-primary btn-block" onclick="closeModal('howto')">Mengerti</button>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-colorpicker" role="dialog" aria-modal="true" aria-labelledby="colorTitle">
+  <div class="modal-sheet">
+    <h3 class="modal-title" id="colorTitle">Pilih Warna</h3>
+    <div class="color-grid">
+      <button class="color-opt" style="background:var(--red)" onclick="changeColor('red')" aria-label="Pilih warna merah">🔴 Merah</button>
+      <button class="color-opt" style="background:var(--yellow);color:#7a5600" onclick="changeColor('yellow')" aria-label="Pilih warna kuning">🟡 Kuning</button>
+      <button class="color-opt" style="background:var(--green)" onclick="changeColor('green')" aria-label="Pilih warna hijau">🟢 Hijau</button>
+      <button class="color-opt" style="background:var(--blue)" onclick="changeColor('blue')" aria-label="Pilih warna biru">🔵 Biru</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-win" role="dialog" aria-modal="true" aria-labelledby="winTitle">
+  <div class="modal-sheet" style="text-align:center">
+    <h3 class="modal-title" id="winTitle">🎉 Menang!</h3>
+    <p class="modal-body">Permainan selesai.</p>
+    <div class="win-list" id="winList"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary btn-block" onclick="closeModal('win');backToLobbyView()">Kembali ke Lobby</button>
+      <button class="btn btn-primary btn-block" id="rematchBtn" onclick="rematchClick()">Main Lagi</button>
+    </div>
+  </div>
+</div>
+
+<!-- ACCOUNT MODALS (TAHAP 8) -->
+<div class="modal-overlay" id="modal-editProfile" role="dialog" aria-modal="true" aria-labelledby="editProfileTitle">
+  <div class="modal-sheet">
+    <h3 class="modal-title" id="editProfileTitle">Edit Profil</h3>
+    <div style="margin-bottom:14px">
+      <label class="field-label" for="editDisplayName">Nama Pemain</label>
+      <input class="field-input" id="editDisplayName" maxlength="20">
+    </div>
+    <div style="margin-bottom:16px">
+      <label class="field-label">Avatar</label>
+      <div class="avatar-grid" id="editAvatarGrid"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary btn-block" onclick="closeModal('editProfile')">Batal</button>
+      <button class="btn btn-primary btn-block" id="saveProfileBtn" onclick="saveProfileFlow()">Simpan</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-forgotPassword" role="dialog" aria-modal="true" aria-labelledby="forgotTitle">
+  <div class="modal-sheet">
+    <h3 class="modal-title" id="forgotTitle">Lupa Password</h3>
+    <div style="margin-bottom:16px">
+      <label class="field-label" for="forgotEmail">Email</label>
+      <input class="field-input" id="forgotEmail" type="email" placeholder="email@contoh.com">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary btn-block" onclick="closeModal('forgotPassword')">Batal</button>
+      <button class="btn btn-primary btn-block" id="forgotBtn" onclick="forgotPasswordFlow()">Kirim</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-logout" role="dialog" aria-modal="true" aria-labelledby="logoutTitle">
+  <div class="modal-sheet">
+    <h3 class="modal-title" id="logoutTitle">Keluar dari akun?</h3>
+    <p class="modal-body" id="logoutWarnText"></p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary btn-block" onclick="closeModal('logout')">Batal</button>
+      <button class="btn btn-primary btn-block" onclick="closeModal('logout');doLogout()">Keluar</button>
+    </div>
+  </div>
+</div>
+
+<!-- FRIEND SYSTEM MODALS (TAHAP 9) -->
+<div class="modal-overlay" id="modal-friendActions" role="dialog" aria-modal="true" aria-labelledby="friendActionsTitle">
+  <div class="modal-sheet">
+    <h3 class="modal-title" id="friendActionsTitle">Opsi Teman</h3>
+    <div class="modal-actions" style="flex-direction:column">
+      <button class="btn btn-secondary btn-block" onclick="closeModal('friendActions');openModal('confirmRemoveFriend')">Hapus Teman</button>
+      <button class="btn btn-secondary btn-block" style="color:var(--red)" onclick="closeModal('friendActions');openModal('confirmBlockFriend')">Blokir Pemain</button>
+      <button class="btn btn-secondary btn-block" onclick="closeModal('friendActions')">Batal</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-confirmRemoveFriend" role="dialog" aria-modal="true" aria-labelledby="confirmRemoveFriendTitle">
+  <div class="modal-sheet">
+    <h3 class="modal-title" id="confirmRemoveFriendTitle">Hapus teman ini?</h3>
+    <p class="modal-body" id="removeFriendName"></p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary btn-block" onclick="closeModal('confirmRemoveFriend')">Batal</button>
+      <button class="btn btn-primary btn-block" style="background:var(--red)" onclick="confirmRemoveFriendAction()">Hapus</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-confirmBlockFriend" role="dialog" aria-modal="true" aria-labelledby="confirmBlockFriendTitle">
+  <div class="modal-sheet">
+    <h3 class="modal-title" id="confirmBlockFriendTitle">Blokir pemain ini?</h3>
+    <p class="modal-body" id="blockFriendName"></p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary btn-block" onclick="closeModal('confirmBlockFriend')">Batal</button>
+      <button class="btn btn-primary btn-block" style="background:var(--red)" onclick="confirmBlockFriendAction()">Blokir</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-gameInvite" role="dialog" aria-modal="true" aria-labelledby="gameInviteTitle">
+  <div class="modal-sheet" style="text-align:center">
+    <h3 class="modal-title" id="gameInviteTitle">Undangan Bermain</h3>
+    <p class="modal-body" id="gameInviteText"></p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary btn-block" onclick="declineGameInvite()">Tolak</button>
+      <button class="btn btn-primary btn-block" onclick="acceptGameInvite()">Gabung</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-inviteFriends" role="dialog" aria-modal="true" aria-labelledby="inviteFriendsTitle">
+  <div class="modal-sheet">
+    <h3 class="modal-title" id="inviteFriendsTitle">Undang Teman</h3>
+    <div id="inviteFriendsWrap" style="display:flex;flex-direction:column;gap:10px;max-height:50vh;overflow-y:auto"></div>
+    <button class="btn btn-secondary btn-block" onclick="closeModal('inviteFriends')" style="margin-top:12px">Tutup</button>
+  </div>
+</div>
+
+<!-- MATCH DETAIL MODAL (TAHAP 10) -->
+<div class="modal-overlay" id="modal-matchDetail" role="dialog" aria-modal="true" aria-labelledby="matchDetailTitle">
+  <div class="modal-sheet">
+    <h3 class="modal-title" id="matchDetailTitle">Detail Pertandingan</h3>
+    <div class="md-summary" id="matchDetailSummary"></div>
+    <div id="matchDetailPlayers"></div>
+    <button class="btn btn-primary btn-block" style="margin-top:14px" onclick="closeModal('matchDetail')">Tutup</button>
+  </div>
+</div>
+
+<!-- TAHAP 11: VOICE CHAT -->
+<button class="voice-fab" id="voiceFab" onclick="Voice.openPanel()" aria-label="Voice Chat">
+  <span id="voiceFabIcon">☎</span><span class="voice-fab-count" id="voiceFabCount"></span>
+</button>
+
+<div class="modal-overlay" id="modal-voice" role="dialog" aria-modal="true" aria-labelledby="voiceTitle">
+  <div class="modal-sheet">
+    <h3 class="modal-title" id="voiceTitle">Voice Chat</h3>
+    <div class="voice-status-row" id="voiceStatusRow"><span class="dot"></span><span id="voiceStatusText">Voice belum terhubung</span></div>
+    <div id="voiceUnlockBanner" style="display:none;margin-bottom:12px">
+      <button class="btn btn-primary btn-block" onclick="Voice.unlockAudio()">🔊 Klik untuk mengaktifkan suara</button>
+    </div>
+    <div class="voice-controlbar">
+      <button class="voice-ctrl-btn" id="voiceConnectBtn" onclick="Voice.toggleConnect()"><span class="ico">☎</span><span>Voice</span></button>
+      <button class="voice-ctrl-btn" id="voiceMicBtn" onclick="Voice.toggleMic()"><span class="ico">🎙</span><span>Mic</span></button>
+      <button class="voice-ctrl-btn" id="voiceSpeakerBtn" onclick="Voice.toggleSpeaker()"><span class="ico">🔊</span><span>Speaker</span></button>
+    </div>
+    <div id="voiceExtraOptions" style="margin-bottom:14px"></div>
+    <div class="voice-opponent-box" id="voiceOpponentBox" style="display:none">
+      <div class="lbl" id="voiceOpponentLabel">Team Voice Only</div>
+      <button class="btn btn-secondary btn-block" id="voiceOpponentBtn" onclick="Voice.askConnectOpponent()">Sambungkan ke Lawan</button>
+    </div>
+    <div class="voice-player-list" id="voicePlayerList"></div>
+    <button class="btn btn-secondary btn-block" onclick="closeModal('voice')">Tutup</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-micperm" role="dialog" aria-modal="true" aria-labelledby="micpermTitle">
+  <div class="modal-sheet">
+    <h3 class="modal-title" id="micpermTitle">Izinkan Microphone</h3>
+    <p class="modal-body" id="micpermBody">Izinkan microphone untuk menggunakan Voice Chat.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary btn-block" onclick="Voice.cancelMicRequest()">Batal</button>
+      <button class="btn btn-primary btn-block" id="micpermActionBtn" onclick="Voice.requestMicFromModal()">Izinkan</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-connectopp" role="dialog" aria-modal="true" aria-labelledby="connectOppTitle">
+  <div class="modal-sheet">
+    <h3 class="modal-title" id="connectOppTitle">Sambungkan suara dengan tim lawan?</h3>
+    <div class="modal-actions">
+      <button class="btn btn-secondary btn-block" onclick="closeModal('connectopp')">Batal</button>
+      <button class="btn btn-primary btn-block" onclick="closeModal('connectopp');Voice.confirmConnectOpponent()">Sambungkan</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="modal-overlay" id="modal-settings" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+  <div class="modal-sheet">
+    <h3 class="modal-title" id="settingsTitle">Pengaturan</h3>
+
+    <div class="set-section">
+      <div class="set-title">Audio</div>
+      <div class="set-row">
+        <label class="set-label" for="setSound">Sound Effect</label>
+        <span class="switch"><input type="checkbox" id="setSound" onchange="updateSetting('soundEnabled', this.checked)"><span class="track"><span class="thumb"></span></span></span>
+      </div>
+      <div class="set-row" style="flex-direction:column;align-items:stretch">
+        <label class="set-label" for="setVolume">Volume</label>
+        <div class="vol-row">
+          <input type="range" id="setVolume" min="0" max="100" step="5" oninput="updateSetting('volume', +this.value)">
+          <span class="vol-val" id="setVolumeVal">70%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="set-section">
+      <div class="set-title">Tampilan</div>
+      <div class="set-row" style="flex-direction:column;align-items:stretch">
+        <label class="set-label">Animasi</label>
+        <div class="seg" id="animSeg">
+          <button onclick="updateSetting('animationMode','full')" data-v="full">Penuh</button>
+          <button onclick="updateSetting('animationMode','reduced')" data-v="reduced">Dikurangi</button>
+          <button onclick="updateSetting('animationMode','off')" data-v="off">Mati</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="set-section">
+      <div class="set-title">Gameplay</div>
+      <div class="set-row">
+        <label class="set-label" for="setExitConfirm">Konfirmasi keluar room</label>
+        <span class="switch"><input type="checkbox" id="setExitConfirm" onchange="updateSetting('exitConfirm', this.checked)"><span class="track"><span class="thumb"></span></span></span>
+      </div>
+      <div class="set-row">
+        <label class="set-label" for="setTurnNotif">Notifikasi giliran</label>
+        <span class="switch"><input type="checkbox" id="setTurnNotif" onchange="updateSetting('turnNotification', this.checked)"><span class="track"><span class="thumb"></span></span></span>
+      </div>
+    </div>
+
+    <div class="set-section">
+      <div class="set-title">Bahasa</div>
+      <div class="seg"><button class="active" disabled>Bahasa Indonesia</button></div>
+    </div>
+
+    <div class="set-section" id="installSection" style="display:none">
+      <div class="set-title">Aplikasi</div>
+      <button class="btn btn-secondary btn-block" id="installBtn" onclick="installApp()">📲 Install UNO PARTY</button>
+    </div>
+    <div class="set-section" id="fullscreenSection" style="display:none">
+      <button class="btn btn-secondary btn-block" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+    </div>
+
+    <button class="btn btn-primary btn-block" onclick="closeModal('settings')">Selesai</button>
+  </div>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+<div class="superseded-overlay" id="supersededOverlay" role="alertdialog" aria-modal="true">
+  <h3 class="modal-title" style="color:#fff">Room dibuka di tab/perangkat lain</h3>
+  <p class="modal-body" style="color:#cfd3da">Sesi kamu di layar ini sudah tidak aktif. Muat ulang halaman ini kalau ingin memakainya lagi.</p>
+  <button class="btn btn-primary" onclick="location.reload()">Muat Ulang</button>
+</div>
+
+<script>
+function initials(n){return n.slice(0,1).toUpperCase()}
+function avatarColor(i){return ["var(--red)","var(--blue)","var(--green)","var(--yellow)"][i%4]}
+
+/* ================= TAHAP 8 — AKUN, PROFIL & IDENTITAS PEMAIN =================
+   Prinsip: myId (Supabase auth uid) sudah dipakai sejak Tahap 4 sebagai Player ID
+   yang stabil (lihat initCapabilities). Login/Register di tahap ini TIDAK pernah
+   mengganti Player ID pemain yang sedang bermain sebagai guest — Register hanya
+   "meningkatkan" sesi anonim yang sudah ada menjadi akun permanen lewat
+   sb.auth.updateUser({email,password}), sehingga uid tetap sama. Login dengan
+   akun yang sudah pernah dibuat di perangkat/tab lain akan memakai uid akun itu
+   sendiri (juga stabil, dan otomatis dipulihkan Supabase dari localStorage saat
+   refresh). Guest mode (tanpa akun) tetap berjalan seperti Tahap 1–7, tidak dihapus.
+   Data profil disimpan lewat infrastruktur docs/RPC yang sudah ada (set_doc/merge_doc),
+   TANPA perlu tabel/skema baru: profiles/<uid> untuk data profil, dan
+   usernames/<username> sebagai penanda keunikan username (best-effort: cek-lalu-tulis
+   lewat get()+set() di atas PK path, cukup untuk skala game kasual ini). */
+
+const AVATAR_LIST = ['🦄','🐯','🐸','🦊','🐼','🐵','🐧','🦁'];
+let myProfile = null;          // {uid, username, displayName, avatar, email, createdAt, updatedAt} atau null (guest)
+let selfInitiatedSignOut = false;
+let selectedRegisterAvatar = AVATAR_LIST[0];
+let selectedEditAvatar = AVATAR_LIST[0];
+
+function profileDocRef(uid){ return db.doc('profiles/' + (uid || myId)); }
+function usernameDocRef(u){ return db.doc('usernames/' + String(u).toLowerCase()); }
+
+function validUsername(u){ return /^[a-zA-Z0-9_]{3,16}$/.test(u); }
+function validEmailFmt(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+function validPasswordFmt(p){ return typeof p === 'string' && p.length >= 6; }
+
+async function loadMyProfile(){
+  if(!db || !myId){ myProfile = null; renderAccountUI(); if(typeof stopFriendSystem==='function') stopFriendSystem(); return; }
+  try{
+    const snap = await profileDocRef().get();
+    myProfile = (snap && snap.exists) ? snap.data() : null;
+  }catch(e){ myProfile = null; }
+  renderAccountUI();
+  // Tahap 9: Friend System hanya aktif untuk akun terdaftar (guest tidak punya username/profil untuk dicari).
+  if(typeof startFriendSystem==='function'){
+    if(myProfile) startFriendSystem(); else stopFriendSystem();
+  }
+}
+
+/* ---- Tampilan akun di Home + prefill nama pemain dari profil (item 5/6/10) ---- */
+function renderAccountUI(){
+  const area = document.getElementById('homeAccountArea');
+  if(area){
+    area.innerHTML = myProfile
+      ? `<button class="account-chip" onclick="goProfile()"><span class="avatar" style="background:var(--blue)">${myProfile.avatar||'🙂'}</span><span>${myProfile.displayName}</span></button>`
+      : `<button class="link-muted" onclick="go('login')">Masuk</button><span style="opacity:.4">•</span><button class="link-muted" onclick="go('register')">Buat Akun</button>`;
+  }
+  const hint = document.getElementById('joinAccountHint');
+  if(hint) hint.innerHTML = myProfile ? '' : 'Punya akun? <button class="link-muted" style="text-decoration:underline" onclick="go(\'login\')">Masuk dulu</button> supaya nama & avatarmu otomatis dipakai.';
+  const c = document.getElementById('createName'); if(c && !c.value && myProfile) c.value = myProfile.displayName;
+  const j = document.getElementById('joinName'); if(j && !j.value && myProfile) j.value = myProfile.displayName;
+}
+
+function goProfile(){
+  if(!myProfile){ toast('Masuk dulu untuk melihat profil.'); go('login'); return; }
+  go('profile');
+}
+
+function renderProfileScreen(){
+  if(!myProfile) return;
+  document.getElementById('profileAvatar').textContent = myProfile.avatar || '🙂';
+  document.getElementById('profileDisplayName').textContent = myProfile.displayName;
+  document.getElementById('profileUsername').textContent = '@' + myProfile.username;
+  document.getElementById('profileJoined').textContent = myProfile.createdAt
+    ? ('Bergabung ' + new Date(myProfile.createdAt).toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'}))
+    : '';
+  // Tahap 10: statistik & achievement selalu dimuat ulang dari server saat profil dibuka.
+  loadMyStats();
+  loadMyAchievements();
+}
+
+function renderAvatarGrid(containerId, selected, context){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  el.innerHTML = AVATAR_LIST.map(a=>`<button type="button" class="avatar-opt ${a===selected?'selected':''}" onclick="selectAvatar('${context}','${a}')" aria-label="Pilih avatar ${a}">${a}</button>`).join('');
+}
+function selectAvatar(context, a){
+  if(context==='register') selectedRegisterAvatar = a; else selectedEditAvatar = a;
+  renderAvatarGrid(context==='register' ? 'registerAvatarGrid' : 'editAvatarGrid', a, context);
+}
+function togglePw(inputId){
+  const el = document.getElementById(inputId);
+  if(!el) return;
+  el.type = el.type === 'password' ? 'text' : 'password';
+}
+
+/* ---------- REGISTER (item 3/4/8) ---------- */
+let registerPending = false;
+async function registerFlow(){
+  if(registerPending) return;
+  const username = (document.getElementById('regUsername').value || '').trim();
+  const displayName = (document.getElementById('regDisplayName').value || '').trim();
+  const email = (document.getElementById('regEmail').value || '').trim();
+  const password = document.getElementById('regPassword').value || '';
+  const confirm = document.getElementById('regConfirm').value || '';
+
+  if(!validUsername(username)){ toast('Username 3–16 karakter: huruf, angka, underscore.'); return; }
+  if(!displayName){ toast('Masukkan nama pemain.'); return; }
+  if(!validEmailFmt(email)){ toast('Email tidak valid.'); return; }
+  if(!validPasswordFmt(password)){ toast('Password minimal 6 karakter.'); return; }
+  if(password !== confirm){ toast('Konfirmasi password tidak sama.'); return; }
+
+  registerPending = true;
+  const btn = document.getElementById('registerBtn'); btn.classList.add('is-loading'); btn.disabled = true;
+  try{
+    await initCapabilities();
+    if(!myId){ toast('Gagal terhubung ke server.'); return; }
+    const uSnap = await usernameDocRef(username).get().catch(()=>null);
+    if(uSnap && uSnap.exists){ toast('Username sudah digunakan.'); return; }
+    // Tingkatkan sesi anonim yang sudah ada menjadi akun permanen (uid tetap sama).
+    // Catatan: perlu "Allow manual linking"/anonymous-to-permanent aktif di project Supabase.
+    const { error } = await sb.auth.updateUser({ email, password });
+    if(error){
+      console.error(error);
+      const m = (error.message||'').toLowerCase();
+      toast(m.includes('already') || m.includes('registered') || m.includes('exists') ? 'Email sudah terdaftar.' : 'Tidak dapat membuat akun. Coba lagi.');
+      return;
+    }
+    await usernameDocRef(username).set({ uid: myId });
+    const now = Date.now();
+    const profile = { uid: myId, username, displayName, avatar: selectedRegisterAvatar, email, createdAt: now, updatedAt: now };
+    await profileDocRef().set(profile);
+    myProfile = profile;
+    renderAccountUI();
+    toast('Akun berhasil dibuat ✓');
+    go('profile');
+  } finally {
+    btn.classList.remove('is-loading'); btn.disabled = false;
+    registerPending = false;
+  }
+}
+
+/* ---------- LOGIN (item 2) ---------- */
+let loginPending = false;
+async function loginFlow(){
+  if(loginPending) return;
+  const email = (document.getElementById('loginEmail').value || '').trim();
+  const password = document.getElementById('loginPassword').value || '';
+  if(!email || !password){ toast('Isi email dan password.'); return; }
+  loginPending = true;
+  const btn = document.getElementById('loginBtn'); btn.classList.add('is-loading'); btn.disabled = true;
+  try{
+    if(!sb) await initCapabilities();
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    if(error || !data.session){ toast('Username atau password salah.'); return; }
+    myId = data.session.user.id;
+    await loadMyProfile();
+    toast('Berhasil masuk ✓');
+    go('profile');
+  } finally {
+    btn.classList.remove('is-loading'); btn.disabled = false;
+    loginPending = false;
+  }
+}
+
+/* ---------- LUPA PASSWORD (item 24) ---------- */
+let forgotPending = false;
+async function forgotPasswordFlow(){
+  if(forgotPending) return;
+  const email = (document.getElementById('forgotEmail').value || '').trim();
+  if(!validEmailFmt(email)){ toast('Email tidak valid.'); return; }
+  forgotPending = true;
+  const btn = document.getElementById('forgotBtn'); btn.classList.add('is-loading'); btn.disabled = true;
+  try{
+    if(!sb) await initCapabilities();
+    await sb.auth.resetPasswordForEmail(email).catch(()=>{});
+    // Pesan sengaja generik: tidak membocorkan apakah email tertentu terdaftar (item 24).
+    toast('Link reset password telah dikirim jika akun tersebut tersedia.');
+    closeModal('forgotPassword');
+  } finally {
+    btn.classList.remove('is-loading'); btn.disabled = false;
+    forgotPending = false;
+  }
+}
+
+/* ---------- LOGOUT (item 12) ---------- */
+function requestLogout(){
+  document.getElementById('logoutWarnText').textContent = currentRoomId
+    ? 'Kamu sedang berada di room/game. Keluar akun tidak akan menghapusmu dari game yang sedang berjalan, tapi identitas akunmu di perangkat ini akan berpindah ke mode tamu.'
+    : 'Kamu perlu masuk kembali untuk mengakses profil ini.';
+  openModal('logout');
+}
+async function doLogout(){
+  selfInitiatedSignOut = true;
+  if(typeof stopFriendSystem==='function') stopFriendSystem();
+  try{ await sb.auth.signOut(); }catch(e){}
+  myProfile = null;
+  myId = null;
+  await initCapabilities();
+  renderAccountUI();
+  toast('Berhasil keluar akun.');
+  go('home');
+}
+
+/* ---------- EDIT PROFIL (item 7/8) ---------- */
+function openEditProfile(){
+  if(!myProfile){ toast('Masuk dulu untuk mengedit profil.'); go('login'); return; }
+  document.getElementById('editDisplayName').value = myProfile.displayName;
+  selectedEditAvatar = myProfile.avatar || AVATAR_LIST[0];
+  renderAvatarGrid('editAvatarGrid', selectedEditAvatar, 'edit');
+  openModal('editProfile');
+}
+let saveProfilePending = false;
+async function saveProfileFlow(){
+  if(saveProfilePending) return;
+  const displayName = (document.getElementById('editDisplayName').value || '').trim();
+  if(!displayName){ toast('Nama pemain tidak boleh kosong.'); return; }
+  saveProfilePending = true;
+  const btn = document.getElementById('saveProfileBtn'); btn.classList.add('is-loading'); btn.disabled = true;
+  try{
+    const now = Date.now();
+    await profileDocRef().update({ displayName, avatar: selectedEditAvatar, updatedAt: now });
+    myProfile = { ...myProfile, displayName, avatar: selectedEditAvatar, updatedAt: now };
+    renderAccountUI();
+    renderProfileScreen();
+    closeModal('editProfile');
+    toast('Profil berhasil diperbarui ✓');
+    // Item 17/18: kalau sedang di lobby (belum main), update tampilan pemain — Player ID tidak berubah.
+    if(currentRoomId && localRoom && localRoom.status === 'waiting'){
+      await withLock(async()=>{
+        const fresh = await roomRef().get();
+        const d = fresh.data();
+        const me = d.players.find(p=>p.id===myId);
+        if(me){ me.name = displayName; me.avatar = selectedEditAvatar; await roomRef().update({players:d.players}); }
+      });
+    }
+  }catch(e){ console.error(e); toast('Gagal menyimpan profil.'); }
+  finally { btn.classList.remove('is-loading'); btn.disabled = false; saveProfilePending = false; }
+}
+
+/* ================= TAHAP 6 — FEEDBACK SYSTEM (toast) ================= */
+// Catatan: toast() dipanggil di banyak tempat sejak Tahap 4/5 tapi belum pernah
+// didefinisikan — akibatnya semua notifikasi selama ini gagal diam-diam. Diperbaiki di sini.
+let toastTimer = null;
+function toast(msg){
+  const el = document.getElementById('toast');
+  if(!el) return;
+  el.textContent = msg;
+  el.classList.add('show');
+  if(toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> el.classList.remove('show'), 2400);
+}
+
+/* ================= TAHAP 6/7 — SOUND EFFECT (ringan, tanpa file audio eksternal) =================
+   Catatan Tahap 7: sumber kebenaran untuk ON/OFF & volume sekarang ada di objek `settings`
+   (localStorage key 'unoSettings'), bukan lagi key terpisah 'unoSoundOn'. */
+let soundOn = true;
+let audioCtx = null;
+function ensureAudioCtx(){
+  if(!soundOn) return null;
+  try{
+    if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==='suspended') audioCtx.resume();
+    return audioCtx;
+  }catch(e){ return null; }
+}
+// Nada pendek per event — ringan, tidak butuh file eksternal, otomatis diam kalau
+// browser memblokir autoplay (AudioContext hanya jalan setelah interaksi user).
+function playTone(freqs, dur=0.12, type='sine'){
+  const ctx = ensureAudioCtx();
+  if(!ctx) return;
+  // Tahap 11 item 35: Ducking Voice — kecilkan sedikit sound effect saat ada yang berbicara di voice chat.
+  const duckMul = (typeof Voice!=='undefined' && Voice.duckingEnabled && Voice.anyoneSpeaking) ? 0.35 : 1;
+  const vol = Math.max(0, Math.min(1, (settings.volume ?? 70)/100)) * 0.18 * duckMul;
+  if(vol<=0) return;
+  freqs.forEach((f,i)=>{
+    const t0 = ctx.currentTime + i*dur*0.55;
+    const osc = ctx.createOscillator(); const gain = ctx.createGain();
+    osc.type = type; osc.frequency.setValueAtTime(f, t0);
+    gain.gain.setValueAtTime(0.001, t0);
+    gain.gain.linearRampToValueAtTime(vol, t0+0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, t0+dur);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(t0); osc.stop(t0+dur+0.02);
+  });
+}
+const SFX = {
+  draw:()=>playTone([320],0.09),
+  play:()=>playTone([420,520],0.09),
+  uno:()=>playTone([500,700,900],0.13,'triangle'),
+  plus2:()=>playTone([260,220],0.12,'sawtooth'),
+  plus4:()=>playTone([260,220,180,140],0.11,'sawtooth'),
+  reverse:()=>playTone([440,360],0.1,'square'),
+  skip:()=>playTone([300,200],0.1,'square'),
+  turn:()=>{ if(settings.turnNotification) playTone([600],0.1,'triangle'); },
+  winner:()=>playTone([523,659,784,1046],0.16,'triangle')
+};
+
+/* ================= TAHAP 6 — BAGIKAN ROOM ================= */
+async function copyRoomCode(){
+  try{
+    await navigator.clipboard.writeText(currentRoomId||'');
+    toast('Kode berhasil disalin ✓');
+  }catch(e){
+    toast('Gagal menyalin. Kode: '+(currentRoomId||''));
+  }
+}
+let sharePending = false;
+async function shareRoom(){
+  if(sharePending) return; sharePending = true;
+  const text = `Yuk main UNO PARTY ONLINE bareng aku!\nRoom Code: ${currentRoomId}`;
+  if(navigator.share){
+    try{ await navigator.share({title:'UNO PARTY ONLINE', text}); }
+    catch(e){ /* dibatalkan user, tidak apa-apa */ }
+  } else {
+    await copyRoomCode();
+  }
+  setTimeout(()=>sharePending=false, 600);
+}
+
+/* ================= TAHAP 6 — EFEK VISUAL KARTU KHUSUS ================= */
+function showFxBadge(text, bg){
+  const wrap = document.createElement('div');
+  wrap.className = 'fx-overlay';
+  wrap.innerHTML = `<div class="fx-badge" style="background:${bg}">${text}</div>`;
+  document.body.appendChild(wrap);
+  setTimeout(()=> wrap.remove(), 750);
+}
+function launchConfetti(){
+  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const colors = ['#E8433A','#F5B400','#2FA84F','#2C7BE5'];
+  for(let i=0;i<26;i++){
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.left = Math.random()*100+'vw';
+    p.style.background = colors[i%colors.length];
+    p.style.animationDuration = (1.6+Math.random()*1.2)+'s';
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(), 3000);
+  }
+}
+function playCardEffect(card){
+  if(!card) return;
+  if(card.type==='draw_two'){ SFX.plus2(); showFxBadge('+2', 'var(--red)'); }
+  else if(card.type==='wild_draw_four'){ SFX.plus4(); showFxBadge('+4', 'linear-gradient(135deg,var(--red),var(--blue))'); }
+  else if(card.type==='reverse'){ SFX.reverse(); showFxBadge('🔄 REVERSE', 'var(--ink)'); }
+  else if(card.type==='skip'){ SFX.skip(); showFxBadge('⛔ SKIP', 'var(--ink)'); }
+  else if(card.type==='wild'){ SFX.play(); showFxBadge('🎨 WILD', 'conic-gradient(var(--red),var(--yellow),var(--green),var(--blue))'); }
+  else { SFX.play(); }
+}
+
+/* ================= TAHAP 2 — SISTEM KARTU UNO ================= */
+let cardIdCounter = 0;
+function newCardId(){ return 'card-' + (++cardIdCounter); }
+
+const COLORS = ["red","yellow","green","blue"];
+
+function createUnoDeck(){
+  const deck = [];
+  COLORS.forEach(color=>{
+    deck.push({id:newCardId(), color, type:"number", value:0});
+    for(let v=1; v<=9; v++){
+      deck.push({id:newCardId(), color, type:"number", value:v});
+      deck.push({id:newCardId(), color, type:"number", value:v});
+    }
+    ["skip","reverse","draw_two"].forEach(type=>{
+      deck.push({id:newCardId(), color, type, value:null});
+      deck.push({id:newCardId(), color, type, value:null});
+    });
+  });
+  for(let i=0;i<4;i++){
+    deck.push({id:newCardId(), color:"wild", type:"wild", value:null});
+    deck.push({id:newCardId(), color:"wild", type:"wild_draw_four", value:null});
+  }
+  return deck;
+}
+
+function shuffleDeck(deck){
+  for(let i=deck.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [deck[i],deck[j]] = [deck[j],deck[i]];
+  }
+  return deck;
+}
+
+function dealCards(deck, playersArr, count=7){
+  playersArr.forEach(p=> p.hand = []);
+  for(let r=0;r<count;r++){
+    playersArr.forEach(p=> p.hand.push(deck.shift()));
+  }
+  return deck; // remaining deck becomes drawPile
+}
+
+function pickInitialDiscard(drawPile){
+  // avoid starting with wild/skip/reverse/draw_two: rotate action cards to bottom until a number card is on top
+  let tries = 0;
+  while(drawPile.length && drawPile[0].type !== "number" && tries < drawPile.length){
+    drawPile.push(drawPile.shift());
+    tries++;
+  }
+  return drawPile.shift();
+}
+
+/* ================= TAHAP 4 — MULTIPLAYER REALTIME (Supabase backend, self-hostable) ================= */
+// GANTI dua nilai di bawah ini dengan URL & anon key project Supabase kamu sendiri
+// (Project Settings → API). Lihat supabase-schema.sql untuk setup tabel & RPC.
+const SUPABASE_URL = 'https://ujpumjljrmfounbohjsx.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVqcHVtamxqcm1mb3VuYm9oanN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA0MzkwNTUsImV4cCI6MjEwNjAxNTA1NX0.qdiwqdYURqZz1QnTdtvrl9_RxuLGjRvR0pDuVIPUkVo';
+
+let sb = null, db = null, myId = null;
+let currentRoomId = null, roomUnsub = null, handUnsub = null;
+let localRoom = null, myHand = [];
+let pendingPlay = null; // {cardId} awaiting color choice (legacy, unused after Tahap 5 but kept for safety)
+let createCount = 4;
+let createGameMode = 'normal'; // Tahap 11: 'normal' | 'team' | 'persaudaraan'
+/* Tahap 6: pelacak perubahan state untuk memicu sound/animasi presentation-layer saja (tidak memengaruhi game engine) */
+let lastDiscardTopId = undefined;
+let lastTurnPlayerId = undefined;
+let lastStatusForFx = undefined;
+let actionPending = false; // proteksi rapid-click sederhana untuk draw/play
+
+/* ================= TAHAP 5 — dukungan client untuk engine server-authoritative ================= */
+let myConnectionId = null;          // id unik tab/perangkat ini, dipakai untuk mendeteksi koneksi ganda
+let heartbeatTimer = null;
+let turnTimerInterval = null;
+let superseded = false;
+
+const ERROR_MESSAGES = {
+  NOT_YOUR_TURN: 'Bukan giliran kamu.',
+  INVALID_CARD: 'Kartu ini tidak dapat dimainkan.',
+  CARD_NOT_OWNED: 'Aksi tidak valid.',
+  GAME_FINISHED: 'Game sudah selesai.',
+  GAME_NOT_PLAYING: 'Game tidak sedang berjalan.',
+  WAITING_FOR_COLOR: 'Pilih warna dulu.',
+  NO_PENDING_COLOR: 'Tidak ada pilihan warna yang menunggu.',
+  INVALID_COLOR: 'Warna tidak valid.',
+  NOT_IN_ROOM: 'Kamu bukan bagian dari room ini.',
+  ROOM_NOT_FOUND: 'Room tidak ditemukan.',
+  TARGET_SAFE: 'Pemain itu aman, tidak kena penalti.',
+  ACTION_EXPIRED: 'Waktu tantangan UNO sudah habis.',
+  TIMER_NOT_EXPIRED: 'Waktu belum habis.',
+  INVALID_CALL: 'Kartu kamu masih lebih dari 1.',
+  NOT_AUTHENTICATED: 'Sesi tidak valid — muat ulang halaman.'
+};
+
+/* Satu-satunya jalur untuk mengubah game state: server (RPC game_action) yang
+   memvalidasi giliran, kepemilikan kartu, dan seluruh aturan UNO. Client hanya
+   mengirim niat (intent) — lihat supabase-schema-tahap5.sql. */
+async function gameAction(type, payload={}){
+  if(!sb || !currentRoomId){ toast('Belum terhubung ke room.'); return {ok:false}; }
+  const actionId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ('a'+Date.now()+Math.random().toString(16).slice(2));
+  const { data, error } = await sb.rpc('game_action', { p_room_id: currentRoomId, p_action_id: actionId, p_action: {type, ...payload} });
+  if(error){ console.error(error); toast('Aksi tidak dapat dilakukan.'); return {ok:false}; }
+  if(!data || !data.ok){
+    const code = data && data.code;
+    if(code!=='TIMER_NOT_EXPIRED') toast((code && ERROR_MESSAGES[code]) || 'Aksi tidak dapat dilakukan.');
+    return data || {ok:false};
+  }
+  return data;
+}
+
+/* ---- Adapter: meniru API db.doc(path).get()/.set()/.update()/.delete()/.acquire()/.onSnapshot()
+   di atas tabel Postgres generik "docs" (path TEXT PK, data JSONB). Validasi kepemilikan
+   dokumen privat (data/users/<uid>/...) dilakukan di server lewat fungsi RPC SECURITY DEFINER
+   (lihat supabase-schema.sql) — bukan sekadar Row Level Security di sisi client. ---- */
+function makeDocRef(path){
+  const channelName = 'doc_' + path.replace(/[^a-zA-Z0-9]/g, '_');
+  return {
+    async get(){
+      const { data, error } = await sb.from('docs').select('data').eq('path', path).maybeSingle();
+      if(error) throw error;
+      return { exists: !!data, data: () => data ? data.data : undefined };
+    },
+    async set(obj){
+      const { error } = await sb.rpc('set_doc', { p_path: path, p_data: obj });
+      if(error) throw error;
+    },
+    async update(partial){
+      const { error } = await sb.rpc('merge_doc', { p_path: path, p_patch: partial });
+      if(error) throw error;
+    },
+    async delete(){
+      const { error } = await sb.rpc('delete_doc', { p_path: path });
+      if(error) throw error;
+    },
+    async acquire({holder, ttlMs}){
+      const { data, error } = await sb.rpc('acquire_lock', { p_path: path, p_holder: holder, p_ttl_ms: ttlMs });
+      if(error){ console.error(error); return {acquired:false}; }
+      return { acquired: !!data };
+    },
+    onSnapshot(next, errCb){
+      let cancelled = false, channel = null;
+      (async ()=>{
+        try{
+          const { data, error } = await sb.from('docs').select('data').eq('path', path).maybeSingle();
+          if(error) throw error;
+          if(!cancelled) next({ exists: !!data, data: () => data ? data.data : undefined });
+        }catch(e){ if(errCb) errCb(e); }
+      })();
+      channel = sb.channel(channelName)
+        .on('postgres_changes', {event:'*', schema:'public', table:'docs', filter:`path=eq.${path}`}, payload=>{
+          if(cancelled) return;
+          if(payload.eventType==='DELETE'){ next({exists:false, data:()=>undefined}); }
+          else { const row = payload.new; next({exists:true, data:()=>row.data}); }
+        })
+        .subscribe();
+      return ()=>{ cancelled = true; if(channel) sb.removeChannel(channel); };
+    }
+  };
+}
+
+async function initCapabilities(){
+  if(!window.supabase){ toast('Pustaka Supabase gagal dimuat. Cek koneksi internet.'); return; }
+  if(!sb){
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    db = { doc: makeDocRef };
+    // Tahap 8: pantau perubahan sesi auth. Kalau sesi berakhir sendiri (bukan karena
+    // kita memanggil signOut sendiri lewat doLogout), anggap sesi habis dan minta login ulang.
+    sb.auth.onAuthStateChange((event)=>{
+      if(event==='SIGNED_OUT' && !selfInitiatedSignOut){
+        myProfile = null;
+        toast('Sesi kamu telah berakhir. Silakan masuk kembali.');
+        renderAccountUI();
+      }
+      selfInitiatedSignOut = false;
+    });
+  }
+  const { data:{ session } } = await sb.auth.getSession();
+  if(!session){
+    const { data, error } = await sb.auth.signInAnonymously();
+    if(error){ console.error(error); toast('Gagal terhubung ke server. Aktifkan Anonymous Sign-In di Supabase.'); myId = null; return; }
+    myId = data.session.user.id;
+  } else {
+    myId = session.user.id;
+  }
+  if(!myConnectionId){
+    myConnectionId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ('c'+Date.now()+Math.random().toString(16).slice(2));
+  }
+  await loadMyProfile();
+}
+initCapabilities();
+
+function roomRef(){ return db.doc('rooms/' + currentRoomId); }
+function lockRef(){ return db.doc('rooms/' + currentRoomId + '/meta/lock'); }
+function handRef(id){ return db.doc('data/users/' + (id||myId) + '/hand_' + currentRoomId); }
+
+function genRoomId(){
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no O/0/I/1 (ambiguous)
+  let s = '';
+  for(let i=0;i<6;i++) s += chars[Math.floor(Math.random()*chars.length)];
+  return s;
+}
+
+async function withLock(fn){
+  if(!db){ toast('Koneksi realtime tidak tersedia.'); return null; }
+  const lease = await lockRef().acquire({holder: myId, ttlMs: 8000}).catch(()=>({acquired:false}));
+  if(!lease.acquired){ toast('Server sibuk, coba lagi.'); return null; }
+  try { return await fn(); }
+  catch(e){ console.error(e); toast('Terjadi masalah koneksi. Silakan coba lagi.'); return null; }
+}
+
+function trimLog(d){ if(d.log.length>15) d.log = d.log.slice(-15); }
+
+
+/* ---------- CREATE / JOIN ---------- */
+function selectCount(btn, groupId, n){
+  document.querySelectorAll('#'+groupId+' .count-opt').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  createCount = n;
+}
+
+/* Tahap 11: pemilihan mode permainan pada Create Room. Mode hanya menentukan
+   maxPlayers & voice grouping — tidak mengubah aturan kartu UNO itu sendiri. */
+function selectGameMode(btn, mode){
+  document.querySelectorAll('#createModeGroup .count-opt').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  createGameMode = mode;
+  const countGroup = document.getElementById('createCount');
+  if(mode==='team'){
+    createCount = 4;
+    countGroup.innerHTML = '<button class="count-opt selected" disabled>4 Pemain (2 vs 2)</button>';
+  } else if(mode==='persaudaraan'){
+    createCount = Math.min(Math.max(createCount,2),6);
+    countGroup.innerHTML = [2,3,4,5,6].map(n=>`<button class="count-opt ${n===createCount?'selected':''}" onclick="selectCount(this,'createCount',${n})">${n} Pemain</button>`).join('');
+  } else {
+    createCount = Math.min(Math.max(createCount,2),4);
+    countGroup.innerHTML = [2,3,4].map(n=>`<button class="count-opt ${n===createCount?'selected':''}" onclick="selectCount(this,'createCount',${n})">${n} Pemain</button>`).join('');
+  }
+}
+
+async function createRoomFlow(){
+  let name = (document.getElementById('createName').value || '').trim();
+  if(!name && myProfile) name = myProfile.displayName;
+  if(!name){ toast('Masukkan nama kamu dulu.'); return; }
+  if(!db){ toast('Realtime belum siap. Coba lagi sebentar.'); return; }
+  const btn = document.getElementById('createBtn'); btn.classList.add('is-loading'); btn.disabled = true;
+  await initCapabilities();
+  if(!myId){ toast('Gagal terhubung ke server.'); btn.classList.remove('is-loading'); btn.disabled=false; return; }
+  const avatar = myProfile ? myProfile.avatar : null;
+  let roomId, attempts = 0;
+  do { roomId = genRoomId(); attempts++; } while(attempts<5 && (await roomRefFor(roomId).get()).exists);
+  const data = {
+    roomId, hostId: myId, maxPlayers: createCount, status: 'waiting',
+    gameMode: createGameMode, voiceConnectOpponent: false, // Tahap 11: voice grouping, tidak memengaruhi aturan kartu
+    players: [{id:myId, name, avatar, isHost:true, isReady:false, connected:true, joinedAt:Date.now(),
+      handCount:0, dealt:false, connectionId:myConnectionId, lastSeen:Date.now(),
+      unoCalled:false, needsUno:false, unoDeadline:null}],
+    createdAt: Date.now(), lastActivity: Date.now(),
+    direction:1, currentPlayerId:null, currentColor:null,
+    drawPile:[], discardPile:[], pendingWild:null,
+    winner:null, turnNumber:0, stateVersion:0, turnDeadline:null, turnTimerSeconds:30,
+    log:['Room dibuat.']
+  };
+  await roomRefFor(roomId).set(data);
+  currentRoomId = roomId;
+  saveSessionPointer(name);
+  btn.classList.remove('is-loading'); btn.disabled = false;
+  subscribeRoom();
+  go('lobby');
+}
+function roomRefFor(id){ return db.doc('rooms/' + id); }
+
+async function joinRoomFlow(){
+  let name = (document.getElementById('joinName').value || '').trim();
+  if(!name && myProfile) name = myProfile.displayName;
+  const code = (document.getElementById('joinCode').value || '').trim().toUpperCase();
+  if(!name){ toast('Masukkan nama kamu dulu.'); return; }
+  if(!code){ toast('Masukkan kode room.'); return; }
+  if(!db){ toast('Realtime belum siap. Coba lagi sebentar.'); return; }
+  const btn = document.getElementById('joinBtn'); btn.classList.add('is-loading'); btn.disabled = true;
+  await initCapabilities();
+  if(!myId){ toast('Gagal terhubung ke server.'); btn.classList.remove('is-loading'); btn.disabled=false; return; }
+  const avatar = myProfile ? myProfile.avatar : null;
+  const ref = roomRefFor(code);
+  const snap = await ref.get().catch(()=>null);
+  if(!snap || !snap.exists){ toast('Room tidak ditemukan.'); btn.classList.remove('is-loading'); btn.disabled=false; return; }
+  currentRoomId = code;
+  let rejoinedStatus = null;
+  const result = await withLock(async()=>{
+    const fresh = await ref.get();
+    const d = fresh.data();
+    const existing = d.players.find(p=>p.id===myId);
+    if(existing){
+      // Reconnect: pemain ini sudah terdaftar di room, izinkan masuk kembali
+      // walau game sudah berjalan (dealing/playing/finished). connectionId diklaim
+      // ulang di sini supaya tab/perangkat lama otomatis dianggap tidak aktif lagi
+      // (lihat startHeartbeat/onRoomUpdate untuk deteksi koneksi ganda).
+      existing.connected = true; existing.name = name; existing.avatar = avatar;
+      existing.connectionId = myConnectionId; existing.lastSeen = Date.now();
+      d.lastActivity = Date.now();
+      await ref.update({players:d.players, lastActivity:d.lastActivity});
+    } else {
+      if(d.status !== 'waiting'){ return 'started'; }
+      if(d.players.length >= d.maxPlayers){ return 'full'; }
+      d.players.push({id:myId, name, avatar, isHost:false, isReady:false, connected:true, joinedAt:Date.now(),
+        handCount:0, dealt:false, connectionId:myConnectionId, lastSeen:Date.now(),
+        unoCalled:false, needsUno:false, unoDeadline:null});
+      d.lastActivity = Date.now();
+      await ref.update({players:d.players, lastActivity:d.lastActivity});
+    }
+    rejoinedStatus = d.status;
+    return 'ok';
+  });
+  btn.classList.remove('is-loading'); btn.disabled = false;
+  if(result==='full'){ toast('Room sudah penuh.'); currentRoomId=null; return; }
+  if(result==='started'){ toast('Game sudah dimulai.'); currentRoomId=null; return; }
+  if(result!=='ok'){ return; }
+  saveSessionPointer(name);
+  subscribeRoom();
+  go(rejoinedStatus==='playing' || rejoinedStatus==='dealing' || rejoinedStatus==='finished' ? 'game' : 'lobby');
+}
+
+/* ---------- SUBSCRIPTIONS ---------- */
+function subscribeRoom(){
+  if(typeof Voice!=='undefined') Voice.disconnectAll(); // Tahap 11: pastikan tidak ada sisa koneksi voice dari room sebelumnya
+  if(roomUnsub) roomUnsub();
+  if(handUnsub) handUnsub();
+  if(typeof invitedInThisRoom !== 'undefined') invitedInThisRoom.clear(); // Tahap 9: room baru = daftar undangan direset
+  document.getElementById('lobbyRoomCode').textContent = 'ROOM: ' + currentRoomId;
+  document.getElementById('topRoomCode').textContent = currentRoomId;
+  roomUnsub = roomRef().onSnapshot(snap=>{
+    if(!snap.exists){ toast('Room tidak tersedia.'); return; }
+    localRoom = snap.data();
+    onRoomUpdate();
+  }, err=>{
+    const bar = document.getElementById('connBar');
+    if(bar){ bar.textContent = '● Menghubungkan kembali...'; bar.classList.add('off'); }
+  });
+  handUnsub = handRef().onSnapshot(snap=>{
+    myHand = (snap.exists && snap.data().cards) ? snap.data().cards : [];
+    if(document.getElementById('game').classList.contains('active')) renderGame();
+  });
+  startHeartbeat();
+  startTurnTimerLoop();
+}
+
+/* Deteksi koneksi ganda (item 34/35): kalau player id kita muncul di room dengan
+   connectionId yang BUKAN milik tab ini, berarti sesi ini sudah "diambil alih"
+   oleh tab/perangkat lain (biasanya karena reconnect dari sana). Tab ini dikunci. */
+function checkSuperseded(){
+  if(!localRoom || superseded) return false;
+  const me = localRoom.players.find(p=>p.id===myId);
+  if(me && me.connectionId && me.connectionId!==myConnectionId){
+    superseded = true;
+    if(heartbeatTimer) clearInterval(heartbeatTimer);
+    if(turnTimerInterval) clearInterval(turnTimerInterval);
+    document.getElementById('supersededOverlay').classList.add('active');
+    if(typeof Voice!=='undefined') Voice.disconnectAll(); // item 29: mic tidak boleh tetap aktif di tab yang sudah diambil alih
+    return true;
+  }
+  return false;
+}
+
+function startHeartbeat(){
+  if(heartbeatTimer) clearInterval(heartbeatTimer);
+  heartbeatTimer = setInterval(async ()=>{
+    if(!currentRoomId || !db || superseded) return;
+    try{
+      const fresh = await roomRef().get();
+      if(!fresh.exists) return;
+      const d = fresh.data();
+      const me = d.players.find(p=>p.id===myId);
+      if(!me || me.connectionId!==myConnectionId) return; // sudah diambil alih tab lain, biarkan checkSuperseded menanganinya
+      me.lastSeen = Date.now();
+      await roomRef().update({players:d.players});
+    }catch(e){ /* koneksi bermasalah sementara, dicoba lagi di detak berikutnya */ }
+  }, 10000);
+}
+
+/* Timer giliran (item 30/31): berdasarkan timestamp server (turnDeadline), bukan
+   countdown lokal semata. Kalau sudah lewat, klien manapun boleh memicu
+   turn_timeout — server yang memvalidasi ulang apakah benar sudah lewat waktu. */
+function startTurnTimerLoop(){
+  if(turnTimerInterval) clearInterval(turnTimerInterval);
+  let firing = false;
+  turnTimerInterval = setInterval(async ()=>{
+    const el = document.getElementById('turnTimer');
+    if(!localRoom || localRoom.status!=='playing' || !localRoom.turnDeadline){
+      if(el) el.textContent=''; return;
+    }
+    const remaining = Math.max(0, Math.round((localRoom.turnDeadline - Date.now())/1000));
+    if(el){ el.textContent = remaining+' detik'; el.classList.toggle('low', remaining<=10); }
+    if(remaining<=0 && !firing && !superseded){
+      firing = true;
+      await gameAction('turn_timeout');
+      firing = false;
+    }
+  }, 1000);
+}
+
+function onRoomUpdate(){
+  const bar = document.getElementById('connBar');
+  if(bar){
+    if(bar.classList.contains('off')){ bar.textContent = '✓ Terhubung kembali'; setTimeout(()=>{ if(bar.textContent==='✓ Terhubung kembali') bar.textContent='● Terhubung'; }, 1800); }
+    else { bar.textContent = '● Terhubung'; }
+    bar.classList.remove('off');
+  }
+  if(checkSuperseded()) return;
+  if(document.getElementById('lobby').classList.contains('active')) renderLobbyUI();
+  if(localRoom.status === 'dealing') performSelfDeal();
+  if(localRoom.status === 'playing' || localRoom.status === 'waiting_for_color'){
+    if(!document.getElementById('game').classList.contains('active')) go('game');
+    else renderGame();
+  }
+  if(localRoom.status === 'finished' && document.getElementById('game').classList.contains('active')) renderGame();
+  if(localRoom.status === 'waiting' && document.getElementById('game').classList.contains('active')) go('lobby');
+  if(typeof Voice!=='undefined') Voice.onRoomUpdate();
+}
+
+/* ---------- LOBBY ---------- */
+function renderLobbyUI(){
+  const d = localRoom;
+  const wrap = document.getElementById('playerSlots');
+  const me = d.players.find(p=>p.id===myId);
+  wrap.innerHTML = d.players.map((p,i)=>`
+    <div class="player-slot enter-anim" style="animation-delay:${i*0.05}s">
+      <div class="avatar" style="background:${avatarColor(i)}">${p.avatar || initials(p.name)}</div>
+      <div class="slot-info"><div class="slot-name">${p.isHost?'<span class="crown">👑</span> ':''}${p.name}</div></div>
+      <span class="status-chip chip-online-dot ${p.connected?'':'chip-off'}"><span class="${p.connected?'dot-online':'dot-offline'}"></span>${p.connected?'Online':'Terputus'}</span>
+      <span class="status-chip ${p.isHost?'chip-host':(p.isReady?'chip-ready':'chip-off')}">${p.isHost?'Host':(p.isReady?'✓ Siap':'Belum Siap')}</span>
+    </div>`).join('') + Array.from({length: Math.max(0, d.maxPlayers - d.players.length)}).map(()=>'<div class="player-slot empty">Menunggu pemain...</div>').join('')
+    + (d.players.length===1 ? '<div class="empty-state">Belum ada pemain lain<br>Bagikan kode room kepada teman untuk mulai bermain.</div>' : '');
+
+  const readyBtn = document.getElementById('readyBtn');
+  readyBtn.style.display = (me && me.isHost) ? 'none' : 'block';
+  readyBtn.textContent = me && me.isReady ? '✓ Siap' : 'Siap';
+  const startBtn = document.getElementById('startBtn');
+  const hint = document.getElementById('lobbyHint');
+  if(me && me.isHost){
+    startBtn.style.display = 'block';
+    const enoughPlayers = d.players.length >= 2;
+    const allReady = d.players.every(p=>p.isHost || p.isReady);
+    startBtn.disabled = !(enoughPlayers && allReady);
+    hint.textContent = !enoughPlayers ? 'Minimal 2 pemain diperlukan.' : (!allReady ? 'Menunggu semua pemain siap.' : '');
+  } else {
+    startBtn.style.display = 'none';
+    hint.textContent = 'Menunggu host memulai game...';
+  }
+}
+
+async function toggleReady(){
+  await withLock(async()=>{
+    const fresh = await roomRef().get();
+    const d = fresh.data();
+    const me = d.players.find(p=>p.id===myId);
+    if(!me || me.isHost) return;
+    me.isReady = !me.isReady;
+    await roomRef().update({players:d.players, lastActivity:Date.now()});
+  });
+}
+
+async function startGame(){
+  const d = localRoom;
+  if(d.players.length<2){ toast('Minimal 2 pemain diperlukan.'); return; }
+  // Tahap 11: Mode Persaudaraan mendukung voice hingga 6 orang, tapi engine kartu
+  // UNO saat ini belum diperluas di luar 4 pemain — pisahkan voice capacity dari game capacity.
+  if((d.gameMode||'normal')==='persaudaraan' && d.players.length>4){ toast('Obrolan suara mendukung hingga 6 orang, tapi permainan kartu saat ini maksimal 4 pemain.'); return; }
+  if(!d.players.every(p=>p.isHost||p.isReady)){ toast('Menunggu semua pemain siap.'); return; }
+  const btn = document.getElementById('startBtn'); btn.classList.add('is-loading'); btn.disabled = true;
+  await withLock(async()=>{
+    const fresh = await roomRef().get();
+    const dd = fresh.data();
+    const deck = shuffleDeck(createUnoDeck());
+    dd.players = dd.players.map(p=>({...p, handCount:0, dealt:false, unoCalled:false, needsUno:false, unoDeadline:null}));
+    dd.status = 'dealing'; dd.drawPile = deck; dd.discardPile = [];
+    dd.direction = 1; dd.currentColor = null; dd.pendingWild = null;
+    dd.winner = null; dd.turnNumber = 0; dd.stateVersion = 0; dd.turnDeadline = null;
+    dd.turnTimerSeconds = dd.turnTimerSeconds || 30; dd.log = ['Game dimulai.'];
+    await roomRef().update(dd);
+  });
+  btn.classList.remove('is-loading'); btn.disabled = false;
+}
+
+/* ---------- DEAL (each client claims its own 7 cards) ---------- */
+async function performSelfDeal(){
+  const already = localRoom.players.find(p=>p.id===myId);
+  if(!already || already.dealt) return;
+  await withLock(async()=>{
+    const fresh = await roomRef().get();
+    const d = fresh.data();
+    if(d.status !== 'dealing') return;
+    const me = d.players.find(p=>p.id===myId);
+    if(!me || me.dealt) return;
+    const myCards = d.drawPile.splice(0,7);
+    me.dealt = true; me.handCount = 7;
+    await handRef().set({cards: myCards});
+    const allDealt = d.players.every(p=>p.dealt);
+    if(allDealt){
+      const first = pickInitialDiscard(d.drawPile);
+      d.discardPile = [first]; d.currentColor = first.color;
+      d.currentPlayerId = d.players[0].id; d.status = 'playing';
+      d.turnDeadline = Date.now() + (d.turnTimerSeconds||30)*1000;
+      d.log.push(`Kartu awal: ${cardLabel(first)} ${first.color}.`); trimLog(d);
+    }
+    await roomRef().update({drawPile:d.drawPile, players:d.players, status:d.status, discardPile:d.discardPile, currentColor:d.currentColor, currentPlayerId:d.currentPlayerId, log:d.log, lastActivity:Date.now()});
+  });
+}
+
+/* ---------- VALIDASI (Tahap 5): hanya untuk UX di klien — mis. menonaktifkan
+   kartu yang tidak bisa dimainkan supaya orang tidak perlu menebak. Ini BUKAN
+   sumber kebenaran: keputusan sebenarnya selalu divalidasi ulang oleh RPC
+   game_action() di server (lihat supabase-schema-tahap5.sql), sehingga klien
+   yang dimodifikasi tidak bisa memainkan kartu ilegal, kartu orang lain, atau
+   mengubah giliran/warna/pemenang secara langsung. ---------- */
+function canPlayCard(card, color, topCard, hand){
+  if(card.type==='wild') return true;
+  if(card.type==='wild_draw_four') return !hand.some(c=>c.id!==card.id && c.color===color);
+  if(card.color===color) return true;
+  if(card.type==='number' && topCard.type==='number' && card.value===topCard.value) return true;
+  return false;
+}
+
+/* ---------- PLAY / DRAW / UNO — semua lewat gameAction() (server-authoritative) ---------- */
+function attemptPlay(cardId){
+  const d = localRoom;
+  if(!d) return;
+  if(actionPending){ return; } // proteksi rapid click/touch (item 30)
+  if(d.status==='waiting_for_color'){ toast('Menunggu pemilihan warna...'); return; }
+  if(d.status!=='playing'){ return; }
+  if(d.currentPlayerId!==myId){ toast('Menunggu giliran...'); return; }
+  const card = myHand.find(c=>c.id===cardId);
+  if(!card) return;
+  const top = d.discardPile[d.discardPile.length-1];
+  if(!canPlayCard(card, d.currentColor, top, myHand)){ toast('Kartu ini tidak dapat dimainkan.'); return; }
+  if(card.type==='wild' || card.type==='wild_draw_four'){ pendingPlay = {cardId}; openModal('colorpicker'); return; }
+  actionPending = true;
+  gameAction('play_card', {cardId}).finally(()=> setTimeout(()=>actionPending=false, 400));
+}
+
+// Dipanggil dari modal pemilih warna. Kalau kita baru saja menekan kartu Wild,
+// warna dikirim bersama play_card; kalau kita reconnect di tengah menunggu
+// pilihan warna (item 28), tidak ada pendingPlay lagi sehingga dikirim lewat
+// choose_color saja — server yang menentukan mana yang valid untuk giliran ini.
+function changeColor(color){
+  closeModal('colorpicker');
+  if(pendingPlay){
+    const {cardId} = pendingPlay; pendingPlay = null;
+    gameAction('play_card', {cardId, chosenColor:color});
+  } else {
+    gameAction('choose_color', {color});
+  }
+}
+
+function drawOneCardMultiplayer(){
+  if(actionPending) return;
+  const d = localRoom;
+  if(!d || d.status!=='playing' || d.currentPlayerId!==myId){ if(d && d.status==='playing') toast('Menunggu giliran...'); return; }
+  actionPending = true;
+  gameAction('draw_card').then(r=>{
+    if(r && r.ok){ SFX.draw(); if(r.drawnPlayable) toast('Kartu bisa dimainkan — ketuk untuk memainkannya.'); }
+  }).finally(()=> setTimeout(()=>actionPending=false, 400));
+}
+
+let unoPending = false;
+function callUnoMultiplayer(){
+  if(unoPending) return; unoPending = true;
+  gameAction('call_uno').then(r=>{ if(r && r.ok){ SFX.uno(); toast('UNO! ✓'); } })
+    .finally(()=> setTimeout(()=>unoPending=false, 500));
+}
+
+function challengeUno(targetPlayerId){
+  gameAction('uno_check', {targetPlayerId}).then(r=>{
+    if(r && r.ok===false && r.code==='TARGET_SAFE') toast('Pemain itu aman.');
+  });
+}
+
+/* ---------- REMATCH / LEAVE ---------- */
+async function rematch(){
+  const me = localRoom.players.find(p=>p.id===myId);
+  if(!me || !me.isHost){ toast('Hanya host yang bisa memulai ulang.'); return; }
+  await withLock(async()=>{
+    const fresh = await roomRef().get();
+    const d = fresh.data();
+    d.status='waiting'; d.players = d.players.map(p=>({...p, isReady:p.isHost, handCount:0, dealt:false, unoCalled:false, needsUno:false, unoDeadline:null}));
+    d.drawPile=[]; d.discardPile=[]; d.winner=null; d.pendingWild=null; d.turnDeadline=null; d.stateVersion=0;
+    d.log=['Kembali ke lobby untuk main lagi.'];
+    await roomRef().update(d);
+  });
+}
+function backToLobbyView(){ go('lobby'); }
+
+async function leaveRoom(){
+  if(typeof Voice!=='undefined') Voice.disconnectAll(); // Tahap 11 item 29: tutup voice sebelum keluar room
+  if(currentRoomId && db){
+    await withLock(async()=>{
+      const fresh = await roomRef().get();
+      if(!fresh.exists) return;
+      const d = fresh.data();
+      if(d.status !== 'waiting'){
+        // Game sudah berlangsung: jangan hapus pemain dari state, cukup tandai
+        // terputus supaya dia bisa reconnect dan game tidak rusak.
+        const me = d.players.find(p=>p.id===myId);
+        if(me) me.connected = false;
+        await roomRef().update({players:d.players, lastActivity:Date.now()});
+        return;
+      }
+      d.players = d.players.filter(p=>p.id!==myId);
+      if(d.players.length===0){ await roomRef().delete(); return; }
+      if(d.hostId===myId){ d.hostId = d.players[0].id; d.players[0].isHost = true; d.log.push(`${d.players[0].name} menjadi host baru.`); trimLog(d); }
+      await roomRef().update({players:d.players, hostId:d.hostId, log:d.log});
+    });
+  }
+  if(roomUnsub) roomUnsub();
+  if(handUnsub) handUnsub();
+  if(heartbeatTimer) clearInterval(heartbeatTimer);
+  if(turnTimerInterval) clearInterval(turnTimerInterval);
+  currentRoomId = null; localRoom = null; myHand = [];
+  clearSessionPointer();
+  go('home');
+  if(typeof updatePresenceNow==='function') updatePresenceNow(); // Tahap 9: presence global ikut diperbarui
+}
+window.addEventListener('beforeunload', ()=>{
+  if(typeof Voice!=='undefined') Voice.disconnectAll(); // item 30: microphone tidak boleh tetap aktif di background
+  if(currentRoomId && db){ roomRef().get().then(s=>{ if(!s.exists) return; const d=s.data(); const me=d.players.find(p=>p.id===myId); if(me){ me.connected=false; roomRef().update({players:d.players}); } }).catch(()=>{}); }
+});
+
+/* ---------- CARD RENDERING (Tahap 2/3 helpers, reused) ---------- */
+const ICONS = {
+  skip: `<svg class="icon-sym" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><line x1="6" y1="18" x2="18" y2="6"/></svg>`,
+  reverse: `<svg class="icon-sym" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 7h11a4 4 0 0 1 4 4"/><path d="M15 3l4 4-4 4"/><path d="M20 17H9a4 4 0 0 1-4-4"/><path d="M9 21l-4-4 4-4"/></svg>`
+};
+function cardLabel(card){
+  if(card.type==='number') return String(card.value);
+  return {skip:'SKIP', reverse:'REVERSE', draw_two:'+2', wild:'WILD', wild_draw_four:'+4'}[card.type];
+}
+function cardInner(card){
+  if(card.type==='skip') return `${ICONS.skip}<span class="val" style="font-size:.6rem;position:absolute;bottom:10px">SKIP</span>`;
+  if(card.type==='reverse') return `${ICONS.reverse}<span class="val" style="font-size:.6rem;position:absolute;bottom:10px">REVERSE</span>`;
+  if(card.type==='draw_two') return `<span class="val">+2</span>`;
+  if(card.type==='wild') return `<span class="val" style="font-size:1rem">WILD</span>`;
+  if(card.type==='wild_draw_four') return `<span class="val" style="font-size:1.1rem">+4</span>`;
+  return `<span class="corner">${card.value}</span><span class="val">${card.value}</span>`;
+}
+function cardHTML(card, opts={}){
+  const cls = ['uno-card', card.color];
+  if(opts.extraClass) cls.push(opts.extraClass);
+  const attrs = opts.onclick ? `onclick="${opts.onclick}"` : '';
+  const style = opts.style ? `style="${opts.style}"` : '';
+  return `<div class="${cls.join(' ')}" data-id="${card.id}" ${attrs} ${style}><span class="oval"></span>${cardInner(card)}</div>`;
+}
+const COLOR_HEX = {red:'var(--red)', yellow:'var(--yellow)', green:'var(--green)', blue:'var(--blue)'};
+
+function renderGame(){
+  const d = localRoom;
+  if(!d || !d.players || !d.players.length) return;
+  const opponents = d.players.filter(p=>p.id!==myId);
+  const myTurn = d.currentPlayerId===myId && d.status==='playing';
+  const now = Date.now();
+
+  /* Tahap 6: presentation-layer only — deteksi perubahan state untuk memicu efek/sound.
+     Tidak pernah menunda atau mengubah state game itu sendiri. */
+  const topForFx = d.discardPile[d.discardPile.length-1];
+  if(topForFx && lastDiscardTopId!==undefined && topForFx.id!==lastDiscardTopId){ playCardEffect(topForFx); }
+  lastDiscardTopId = topForFx ? topForFx.id : lastDiscardTopId;
+  if(d.status==='playing' && lastTurnPlayerId!==undefined && d.currentPlayerId!==lastTurnPlayerId && d.currentPlayerId===myId){ SFX.turn(); }
+  lastTurnPlayerId = d.currentPlayerId;
+  if(d.status==='finished' && lastStatusForFx!=='finished'){ SFX.winner(); launchConfetti(); }
+  lastStatusForFx = d.status;
+
+  document.getElementById('opponentsWrap').innerHTML = opponents.map((p,oi)=>{
+    const active = d.currentPlayerId===p.id;
+    const canChallenge = (p.handCount===1) && !p.unoCalled && p.unoDeadline && now < p.unoDeadline;
+    return `<div class="opponent-row" style="${active?'outline:3px solid var(--ink);border-radius:16px;padding:6px 10px':''}">
+      <div class="avatar opp-avatar" style="background:${avatarColor(oi+1)}">${p.avatar || initials(p.name)}</div>
+      <div class="opponent-name-row"><span class="opponent-name">${p.name}${!p.connected?' 🔸terputus':''}</span></div>
+      <div class="opponent-cards">${Array.from({length:p.handCount||0}).map(()=>'<div class="mini-card back"></div>').join('')}</div>
+      <span class="card-count">${p.handCount||0} kartu</span>
+      ${canChallenge ? `<button class="uno-challenge-btn" onclick="challengeUno('${p.id}')">Tantang UNO</button>` : ''}
+    </div>`;
+  }).join('');
+
+  const currentPlayer = d.players.find(p=>p.id===d.currentPlayerId);
+  document.getElementById('turnIndicator').textContent =
+    d.status==='finished' ? 'Game selesai' :
+    d.status==='waiting_for_color' ? `Menunggu ${d.pendingWild && d.pendingWild.playerId===myId ? 'kamu' : (d.players.find(p=>p.id===(d.pendingWild&&d.pendingWild.playerId))||{}).name||''} memilih warna` :
+    (myTurn ? 'Giliran Kamu' : `Giliran ${currentPlayer?currentPlayer.name:''}`);
+
+  const topDiscard = d.discardPile[d.discardPile.length-1];
+  document.getElementById('discardPileCard').outerHTML = `<div id="discardPileCard">${topDiscard ? cardHTML(topDiscard) : ''}</div>`;
+  document.getElementById('drawPileCard').style.opacity = (d.drawPile.length || d.discardPile.length>1) ? '1' : '.4';
+  const pill = document.getElementById('colorPill');
+  pill.textContent = ({red:'Merah',yellow:'Kuning',green:'Hijau',blue:'Biru'})[d.currentColor] || '';
+  pill.style.background = COLOR_HEX[d.currentColor] || 'var(--ink-soft)';
+
+  document.getElementById('myCount').textContent = myHand.length;
+  document.getElementById('handCards').innerHTML = myHand.map((c,i)=>{
+    const playable = myTurn && d.status==='playing' && canPlayCard(c, d.currentColor, topForFx, myHand);
+    const cls = 'card-deal-anim' + (playable ? '' : ' card-unplayable');
+    return cardHTML(c, {extraClass:cls, style:`animation-delay:${i*0.04}s`, onclick:`attemptPlay('${c.id}')`});
+  }).join('');
+
+  const meState = d.players.find(p=>p.id===myId);
+  const iAmWaitingForColor = d.status==='waiting_for_color' && d.pendingWild && d.pendingWild.playerId===myId;
+  if(iAmWaitingForColor && !document.getElementById('modal-colorpicker').classList.contains('active')){
+    // Reconnect di tengah giliran memilih warna sendiri (item 28): tampilkan lagi modalnya.
+    pendingPlay = null;
+    openModal('colorpicker');
+  }
+
+  document.getElementById('handCards').classList.toggle('disabled-zone', !myTurn || actionPending);
+  document.getElementById('drawPileCard').classList.toggle('disabled-zone', !myTurn || actionPending);
+  document.getElementById('turnHint').textContent = myTurn ? '' : (d.status==='playing' ? 'Menunggu giliran...' : (d.status==='waiting_for_color' ? '' : ''));
+  const unoBtn = document.getElementById('unoBtn');
+  const needsUnoNow = meState && myHand.length===1 && !meState.unoCalled;
+  unoBtn.style.opacity = needsUnoNow ? '1' : '.5';
+  unoBtn.classList.toggle('urgent', !!needsUnoNow);
+  unoBtn.classList.toggle('said', !!(meState && meState.unoCalled));
+
+  if(d.status==='finished'){
+    const winner = d.players.find(p=>p.id===d.winner);
+    document.getElementById('winTitle').textContent = `🎉 ${winner?winner.name:''} Menang!`;
+    document.getElementById('winList').innerHTML = d.players.map((p,i)=>`
+      <div class="win-row ${p.id===d.winner?'champ':''}">
+        <div class="avatar" style="background:${avatarColor(i)}">${p.avatar || initials(p.name)}</div>
+        <span class="wname">${p.id===d.winner?'👑 ':''}${p.name}</span>
+        <span class="wcount">${p.id===d.winner?'Menang' : (p.handCount||0)+' kartu'}</span>
+      </div>`).join('');
+    const me = d.players.find(p=>p.id===myId);
+    document.getElementById('rematchBtn').textContent = me && me.isHost ? 'Main Lagi' : 'Menunggu host...';
+    openModal('win');
+  }
+}
+
+function go(id, opts={}){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+  if(typeof Voice!=='undefined') Voice.updateFabVisibility(); // Tahap 11: FAB voice hanya tampil di lobby/game
+  if(id==='lobby'){
+    if(localRoom) renderLobbyUI();
+    else document.getElementById('playerSlots').innerHTML = '<div class="skeleton skeleton-slot"></div><div class="skeleton skeleton-slot"></div>';
+  }
+  if(id==='game'){
+    if(localRoom) renderGame();
+  }
+  if(id==='profile'){
+    // Item 13 — proteksi route: profil hanya untuk pemain yang sudah login.
+    if(!myProfile){ go('login'); return; }
+    renderProfileScreen();
+  }
+  if(id==='leaderboard'){
+    // Tahap 10: sama seperti profil/teman — perlu akun terdaftar (tab Teman butuh friend system Tahap 9).
+    if(!myProfile){ toast('Masuk dulu untuk melihat leaderboard.'); go('login'); return; }
+    switchLeaderboardTab(currentLeaderboardTab);
+  }
+  if(id==='matchHistory'){
+    if(!myProfile){ toast('Masuk dulu untuk melihat riwayat pertandingan.'); go('login'); return; }
+    loadMatchHistory();
+  }
+  if(id==='login'){
+    const p = document.getElementById('loginPassword'); if(p) p.value = '';
+  }
+  if(id==='register'){
+    const rp = document.getElementById('regPassword'); if(rp) rp.value = '';
+    const rc = document.getElementById('regConfirm'); if(rc) rc.value = '';
+    renderAvatarGrid('registerAvatarGrid', selectedRegisterAvatar, 'register');
+  }
+  // Tahap 9 — halaman Teman: proteksi route (item 34, sama seperti profil) + siklus polling.
+  if(typeof friendsPollTimer !== 'undefined' && friendsPollTimer && id!=='friends'){ clearInterval(friendsPollTimer); friendsPollTimer = null; }
+  if(id==='friends'){
+    if(!myProfile){ toast('Masuk dulu untuk menggunakan fitur Teman.'); go('login'); return; }
+    if(typeof refreshFriendData==='function'){
+      refreshFriendData().then(()=> switchFriendTab(currentFriendTab||'list'));
+      if(friendsPollTimer) clearInterval(friendsPollTimer);
+      friendsPollTimer = setInterval(()=>{ if(document.getElementById('friends').classList.contains('active')) refreshFriendData(); }, 12000);
+    }
+  }
+  if(typeof updatePresenceNow==='function' && myProfile) updatePresenceNow();
+  if(!opts.silentNav) pushNavState(id);
+}
+
+/* ---------- TAHAP 7: browser back button ---------- */
+function pushNavState(screen){
+  try{
+    const url = new URL(location.href);
+    if(screen==='lobby' || screen==='game'){ url.searchParams.set('room', currentRoomId||''); }
+    else { url.searchParams.delete('room'); }
+    history.pushState({screen}, '', url);
+  }catch(e){}
+}
+window.addEventListener('popstate', ()=>{
+  const active = document.querySelector('.screen.active');
+  if(!active) return;
+  if(active.id==='game'){
+    // Jangan langsung keluar dari game lewat tombol back — tampilkan konfirmasi dulu (item 14/15),
+    // kecuali user sudah mematikan "Konfirmasi keluar room" di Pengaturan.
+    pushNavState('game');
+    if(settings.exitConfirm) openModal('exit'); else leaveRoom();
+  } else if(active.id==='lobby'){
+    leaveRoom();
+  }
+  // di home/createRoom/joinRoom: tidak ada risiko kehilangan state, biarkan navigasi berjalan normal.
+});
+
+function openModal(name){document.getElementById('modal-'+name).classList.add('active')}
+function closeModal(name){document.getElementById('modal-'+name).classList.remove('active')}
+
+/* ---------- TAHAP 7: SETTINGS ---------- */
+const DEFAULT_SETTINGS = {soundEnabled:true, volume:70, animationMode:'full', exitConfirm:true, turnNotification:true, language:'id'};
+let settings = {...DEFAULT_SETTINGS};
+function loadSettings(){
+  try{
+    const raw = localStorage.getItem('unoSettings');
+    if(raw) settings = {...DEFAULT_SETTINGS, ...JSON.parse(raw)};
+    else if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) settings.animationMode = 'reduced';
+  }catch(e){}
+  soundOn = settings.soundEnabled;
+  applySettingsToUI();
+  applySettingsToDOM();
+}
+function saveSettings(){ try{ localStorage.setItem('unoSettings', JSON.stringify(settings)); }catch(e){} }
+function updateSetting(key, value){
+  settings[key] = value;
+  if(key==='soundEnabled') soundOn = value;
+  saveSettings();
+  applySettingsToUI();
+  applySettingsToDOM();
+  if(key==='soundEnabled' && value) ensureAudioCtx();
+}
+function applySettingsToUI(){
+  const s1 = document.getElementById('setSound'); if(s1) s1.checked = !!settings.soundEnabled;
+  const v = document.getElementById('setVolume'); if(v) v.value = settings.volume;
+  const vv = document.getElementById('setVolumeVal'); if(vv) vv.textContent = settings.volume+'%';
+  const ec = document.getElementById('setExitConfirm'); if(ec) ec.checked = !!settings.exitConfirm;
+  const tn = document.getElementById('setTurnNotif'); if(tn) tn.checked = !!settings.turnNotification;
+  document.querySelectorAll('#animSeg button').forEach(b=> b.classList.toggle('active', b.dataset.v===settings.animationMode));
+  document.querySelectorAll('.sound-toggle').forEach(b=> b.textContent = settings.soundEnabled ? '🔊 Suara: ON' : '🔇 Suara: OFF');
+}
+function applySettingsToDOM(){
+  document.documentElement.classList.toggle('anim-off', settings.animationMode==='off');
+  document.documentElement.classList.toggle('anim-reduced', settings.animationMode==='reduced');
+}
+function toggleSound(){ updateSetting('soundEnabled', !settings.soundEnabled); }
+
+/* ---------- TAHAP 7: PWA (manifest + install prompt + best-effort service worker) ---------- */
+function buildIconDataUri(size){
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+    <rect width="192" height="192" rx="40" fill="#E8433A"/>
+    <ellipse cx="96" cy="96" rx="66" ry="84" fill="none" stroke="#fff" stroke-width="7" transform="rotate(20 96 96)"/>
+    <text x="96" y="112" font-family="Baloo 2, sans-serif" font-size="54" font-weight="800" fill="#fff" text-anchor="middle">UNO</text>
+  </svg>`;
+  return 'data:image/svg+xml;base64,' + btoa(svg);
+}
+function setupPWA(){
+  const icon = buildIconDataUri(192);
+  document.getElementById('favIcon').href = icon;
+  document.getElementById('appleIcon').href = icon;
+  const manifest = {
+    name:'UNO PARTY ONLINE', short_name:'UNO PARTY',
+    description:'Main UNO bareng teman, kapan saja.',
+    start_url: location.pathname, scope: location.pathname,
+    display:'standalone', background_color:'#FBF9F4', theme_color:'#E8433A',
+    icons:[{src:icon, sizes:'192x192', type:'image/svg+xml', purpose:'any maskable'}]
+  };
+  try{
+    const blob = new Blob([JSON.stringify(manifest)], {type:'application/manifest+json'});
+    document.getElementById('manifestLink').href = URL.createObjectURL(blob);
+  }catch(e){}
+  // Service worker minimal (best-effort, hanya untuk shell offline) — dibuat sebagai Blob URL
+  // karena project ini satu file HTML. Kalau browser tidak mendukung registrasi via Blob,
+  // gagal secara diam-diam dan PWA tetap berjalan tanpa cache offline.
+  if('serviceWorker' in navigator){
+    const swCode = `self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>self.clients.claim());self.addEventListener('fetch',()=>{});`;
+    try{
+      const swBlob = new Blob([swCode], {type:'application/javascript'});
+      navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
+    }catch(e){}
+  }
+}
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  const sec = document.getElementById('installSection');
+  if(sec) sec.style.display = 'block';
+});
+async function installApp(){
+  if(!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  document.getElementById('installSection').style.display = 'none';
+}
+window.addEventListener('appinstalled', ()=>{ toast('UNO PARTY ONLINE terpasang!'); });
+
+/* ---------- TAHAP 7: FULLSCREEN (hanya tampil kalau benar-benar didukung) ---------- */
+function setupFullscreenOption(){
+  const sec = document.getElementById('fullscreenSection');
+  if(sec && document.documentElement.requestFullscreen) sec.style.display = 'block';
+}
+function toggleFullscreen(){
+  if(!document.fullscreenElement){ document.documentElement.requestFullscreen().catch(()=>toast('Fullscreen tidak didukung perangkat ini.')); }
+  else { document.exitFullscreen(); }
+}
+
+/* ---------- TAHAP 7: OFFLINE / ONLINE ---------- */
+function updateOnlineStatus(){
+  const banner = document.getElementById('offlineBanner');
+  if(!navigator.onLine){ banner.classList.add('show'); }
+  else { banner.classList.remove('show'); if(currentRoomId) toast('Koneksi tersedia'); }
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+
+/* ---------- TAHAP 7: duplicate-action protection tambahan ---------- */
+let readyPending = false;
+async function toggleReadyClick(){
+  if(readyPending) return; readyPending = true;
+  await toggleReady();
+  setTimeout(()=>readyPending=false, 500);
+}
+let rematchPending = false;
+async function rematchClick(){
+  if(rematchPending) return; rematchPending = true;
+  closeModal('win');
+  await rematch();
+  setTimeout(()=>rematchPending=false, 800);
+}
+function requestExitGame(){
+  if(settings.exitConfirm) openModal('exit');
+  else leaveRoom();
+}
+
+/* ---------- TAHAP 7: SHARE LINK (?room=CODE) & SESSION RECOVERY ---------- */
+function initFromUrlOrSession(){
+  const params = new URLSearchParams(location.search);
+  const roomFromUrl = (params.get('room')||'').trim().toUpperCase();
+  if(roomFromUrl && !currentRoomId){
+    document.getElementById('joinCode').value = roomFromUrl;
+    go('joinRoom', {silentNav:true});
+    return;
+  }
+  let saved = null;
+  try{ saved = JSON.parse(localStorage.getItem('unoSession')||'null'); }catch(e){}
+  if(saved && saved.roomId && saved.name){
+    go('recovery', {silentNav:true});
+    recoverSession(saved);
+  } else {
+    go('home', {silentNav:true});
+  }
+}
+async function recoverSession(saved){
+  await initCapabilities();
+  if(!myId || !db){ showRecoveryFailed(); return; }
+  const snap = await roomRefFor(saved.roomId).get().catch(()=>null);
+  if(!snap || !snap.exists){ showRecoveryFailed(); return; }
+  const d = snap.data();
+  const existing = d.players.find(p=>p.id===myId);
+  if(!existing){ showRecoveryFailed(); return; }
+  currentRoomId = saved.roomId;
+  await withLock(async()=>{
+    const fresh = await roomRef().get();
+    const dd = fresh.data();
+    const me = dd.players.find(p=>p.id===myId);
+    if(me){ me.connected = true; me.connectionId = myConnectionId; me.lastSeen = Date.now(); }
+    await roomRef().update({players:dd.players, lastActivity:Date.now()});
+  });
+  document.getElementById('recoveryTitle').textContent = 'Permainan berhasil dipulihkan';
+  document.getElementById('recoverySpinner').style.display = 'none';
+  subscribeRoom();
+  setTimeout(()=>{
+    go(d.status==='waiting' ? 'lobby' : 'game', {silentNav:true});
+  }, 500);
+}
+function showRecoveryFailed(){
+  try{ localStorage.removeItem('unoSession'); }catch(e){}
+  document.getElementById('recoveryTitle').textContent = 'Room sudah tidak tersedia';
+  document.getElementById('recoverySub').textContent = '';
+  document.getElementById('recoverySpinner').style.display = 'none';
+  document.getElementById('recoveryHomeBtn').style.display = 'block';
+}
+function saveSessionPointer(name){
+  try{ localStorage.setItem('unoSession', JSON.stringify({roomId:currentRoomId, name})); }catch(e){}
+}
+function clearSessionPointer(){
+  try{ localStorage.removeItem('unoSession'); }catch(e){}
+}
+
+/* ================= TAHAP 9 — FRIEND SYSTEM, INVITE & SOCIAL PLAY =================
+   Prinsip: memakai infrastruktur docs/RPC yang sama seperti profiles/usernames/rooms
+   (set_doc/merge_doc/get lewat db.doc(path)) — TIDAK ada tabel/skema baru.
+     friends/<pairKey>        relasi kanonik dua arah (pairKey = id diurutkan & digabung,
+                               sehingga A→B dan B→A otomatis satu dokumen yang sama — item 8).
+     friend_index/<uid>       daftar teman & status permintaan milik satu pemain (untuk
+                               render cepat + badge), disinkronkan setiap ada aksi.
+     invite_index/<uid>       undangan main yang masuk untuk satu pemain — di-subscribe
+                               realtime lewat onSnapshot (path persis), sama seperti rooms/.
+     presence/<uid>           status online/sedang bermain, diperbarui via heartbeat berkala.
+     blocks/<uid>              daftar pemain yang diblokir (hanya pemiliknya yang menulis).
+   Catatan jujur soal keamanan (item 24/37): backend proyek ini adalah tabel generik
+   "docs" yang bisa ditulis dari klien mana pun melalui RPC set_doc/merge_doc (pola yang
+   sama dipakai profiles/usernames sejak Tahap 8). Artinya validasi di sini tetap di sisi
+   klien, sama seperti fitur akun sebelumnya — bukan RPC server-authoritative seperti
+   game_action(). Mengunci ini sepenuhnya di server butuh menambah fungsi RPC baru di
+   database (di luar kemampuan file HTML tunggal ini untuk dijalankan/di-deploy). */
+
+function escapeAttr(s){ return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+function pairKey(a,b){ return [a,b].sort().join('__'); }
+function friendRelRef(a,b){ return db.doc('friends/' + pairKey(a,b)); }
+function friendIndexRef(uid){ return db.doc('friend_index/' + (uid||myId)); }
+function presenceRef(uid){ return db.doc('presence/' + (uid||myId)); }
+function inviteIndexRef(uid){ return db.doc('invite_index/' + (uid||myId)); }
+function blocksRef(uid){ return db.doc('blocks/' + (uid||myId)); }
+
+async function readIndexDoc(ref){
+  const snap = await ref.get().catch(()=>null);
+  return (snap && snap.exists) ? snap.data() : {updatedAt:0, items:{}};
+}
+async function getBlocks(uid){
+  const doc = await blocksRef(uid).get().catch(()=>null);
+  return (doc && doc.exists && Array.isArray(doc.data().items)) ? doc.data().items : [];
+}
+async function writeIndexItem(uid, peerId, itemOrNull){
+  const doc = await readIndexDoc(friendIndexRef(uid));
+  const items = {...doc.items};
+  if(itemOrNull===null) delete items[peerId]; else items[peerId] = itemOrNull;
+  await friendIndexRef(uid).set({updatedAt:Date.now(), items});
+}
+
+async function ensureFriendSystemReady(){
+  if(!myProfile){ toast('Masuk dulu untuk menggunakan fitur Teman.'); go('login'); return false; }
+  if(!db) await initCapabilities();
+  if(!myId){ toast('Gagal terhubung ke server.'); return false; }
+  return true;
+}
+
+/* ---------- PRESENCE (online / sedang bermain) ---------- */
+let presenceHeartbeatTimer = null;
+async function updatePresenceNow(){
+  if(!myId || !db) return;
+  try{
+    await presenceRef(myId).set({ uid: myId, lastSeen: Date.now(), roomId: currentRoomId||null, roomStatus: (localRoom && localRoom.status) || null });
+  }catch(e){ /* koneksi bermasalah sementara, tidak fatal */ }
+}
+function isPresenceOnline(p){ return !!(p && (Date.now() - p.lastSeen) < 45000); }
+function isPresencePlaying(p){ return isPresenceOnline(p) && p.roomStatus === 'playing'; }
+
+/* ---------- BADGE & DATA REFRESH ---------- */
+let myFriendIndex = null;
+let myBlocks = [];
+let badgePollTimer = null;
+function countIncomingRequests(){
+  if(!myFriendIndex || !myFriendIndex.items) return 0;
+  return Object.values(myFriendIndex.items).filter(i=>i.status==='pending' && i.direction==='incoming').length;
+}
+function updateFriendBadge(){
+  const n = countIncomingRequests();
+  ['friendBadge','friendReqTabBadge'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.textContent = n>0 ? String(n) : '';
+    el.style.display = n>0 ? 'inline-flex' : 'none';
+  });
+}
+async function refreshFriendBadgeOnly(){
+  if(!myProfile || !myId) return;
+  try{ myFriendIndex = await readIndexDoc(friendIndexRef(myId)); updateFriendBadge(); }catch(e){}
+}
+function startBadgePolling(){
+  if(badgePollTimer) clearInterval(badgePollTimer);
+  refreshFriendBadgeOnly();
+  badgePollTimer = setInterval(refreshFriendBadgeOnly, 25000);
+}
+async function refreshFriendData(){
+  if(!myProfile || !myId) return;
+  try{
+    myFriendIndex = await readIndexDoc(friendIndexRef(myId));
+    myBlocks = await getBlocks(myId);
+    updateFriendBadge();
+  }catch(e){ console.error(e); }
+}
+
+/* ---------- INVITE (undangan main) — realtime lewat onSnapshot exact-path ---------- */
+let myInvites = {};
+let inviteUnsub = null;
+let invitedInThisRoom = new Set();
+function subscribeInvites(){
+  if(inviteUnsub) inviteUnsub();
+  inviteUnsub = inviteIndexRef(myId).onSnapshot(snap=>{
+    const data = snap.exists ? snap.data() : {items:{}};
+    const items = data.items || {};
+    const now = Date.now();
+    Object.values(items).forEach(iv=>{
+      if(!myInvites[iv.inviteId] && iv.expiresAt > now && !document.getElementById('modal-gameInvite').classList.contains('active')){
+        showGameInviteModal(iv);
+      }
+    });
+    myInvites = items;
+  }, ()=>{});
+}
+function showGameInviteModal(iv){
+  document.getElementById('gameInviteText').textContent = `${iv.fromName} mengajak kamu bermain UNO PARTY.`;
+  document.getElementById('modal-gameInvite').dataset.inviteId = iv.inviteId;
+  openModal('gameInvite');
+  SFX.turn();
+}
+async function removeMyInvite(inviteId){
+  try{
+    const doc = await readIndexDoc(inviteIndexRef(myId));
+    const items = {...doc.items}; delete items[inviteId];
+    await inviteIndexRef(myId).set({items, updatedAt:Date.now()});
+  }catch(e){}
+}
+async function acceptGameInvite(){
+  const modal = document.getElementById('modal-gameInvite');
+  const inviteId = modal.dataset.inviteId;
+  const iv = myInvites[inviteId];
+  closeModal('gameInvite');
+  if(!iv){ toast('Undangan sudah tidak berlaku.'); return; }
+  if(iv.expiresAt < Date.now()){ toast('Undangan sudah kedaluwarsa.'); await removeMyInvite(inviteId); return; }
+  document.getElementById('joinCode').value = iv.roomId;
+  document.getElementById('joinName').value = myProfile ? myProfile.displayName : '';
+  await removeMyInvite(inviteId);
+  go('joinRoom');
+  await joinRoomFlow(); // validasi room/kapasitas/status sepenuhnya memakai alur Gabung Room yang sudah ada
+}
+async function declineGameInvite(){
+  const modal = document.getElementById('modal-gameInvite');
+  const inviteId = modal.dataset.inviteId;
+  closeModal('gameInvite');
+  await removeMyInvite(inviteId);
+}
+async function sendInviteDoc(peerId, peerName, roomId){
+  const doc = await readIndexDoc(inviteIndexRef(peerId));
+  const existing = Object.values(doc.items||{}).find(iv=>iv.fromId===myId && iv.roomId===roomId);
+  if(existing){ toast('Undangan sudah dikirim.'); return; }
+  const inviteId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ('inv'+Date.now()+Math.random().toString(16).slice(2));
+  const now = Date.now();
+  const items = {...doc.items, [inviteId]: {inviteId, fromId:myId, fromName:myProfile.displayName, fromAvatar:myProfile.avatar, roomId, createdAt:now, expiresAt: now + 10*60*1000}};
+  await inviteIndexRef(peerId).set({items, updatedAt:now});
+  toast(`Undangan terkirim ke ${peerName}.`);
+}
+async function createOwnRoomSilently(){
+  const name = myProfile.displayName, avatar = myProfile.avatar;
+  let roomId, attempts = 0;
+  do { roomId = genRoomId(); attempts++; } while(attempts<5 && (await roomRefFor(roomId).get()).exists);
+  const data = {
+    roomId, hostId: myId, maxPlayers: 4, status: 'waiting',
+    players: [{id:myId, name, avatar, isHost:true, isReady:false, connected:true, joinedAt:Date.now(),
+      handCount:0, dealt:false, connectionId:myConnectionId, lastSeen:Date.now(),
+      unoCalled:false, needsUno:false, unoDeadline:null}],
+    createdAt: Date.now(), lastActivity: Date.now(),
+    direction:1, currentPlayerId:null, currentColor:null,
+    drawPile:[], discardPile:[], pendingWild:null,
+    winner:null, turnNumber:0, stateVersion:0, turnDeadline:null, turnTimerSeconds:30,
+    log:['Room dibuat.']
+  };
+  try{ await roomRefFor(roomId).set(data); }catch(e){ console.error(e); toast('Gagal membuat room.'); return null; }
+  currentRoomId = roomId;
+  saveSessionPointer(name);
+  subscribeRoom();
+  return roomId;
+}
+let invitePending = {};
+async function inviteFriendToPlay(peerId, peerName){
+  if(!(await ensureFriendSystemReady())) return;
+  if(invitePending[peerId]) return; invitePending[peerId] = true;
+  try{
+    let roomId = currentRoomId;
+    const needNewRoom = !roomId || !localRoom || localRoom.status!=='waiting' || localRoom.hostId!==myId;
+    if(needNewRoom){ roomId = await createOwnRoomSilently(); if(!roomId) return; go('lobby'); }
+    await sendInviteDoc(peerId, peerName, roomId);
+  }catch(e){ console.error(e); toast('Gagal mengirim undangan.'); }
+  finally{ invitePending[peerId] = false; }
+}
+async function openInviteFromLobby(){
+  if(!currentRoomId){ toast('Kamu belum berada di room.'); return; }
+  if(!(await ensureFriendSystemReady())) return;
+  openModal('inviteFriends');
+  await renderInviteFromLobbyModal();
+}
+async function renderInviteFromLobbyModal(){
+  const wrap = document.getElementById('inviteFriendsWrap');
+  if(!wrap) return;
+  const idx = await readIndexDoc(friendIndexRef(myId));
+  const friendsArr = Object.values(idx.items||{}).filter(i=>i.status==='accepted');
+  if(!friendsArr.length){ wrap.innerHTML = '<div class="empty-state">Belum ada teman untuk diundang.</div>'; return; }
+  const presences = await Promise.all(friendsArr.map(f=>presenceRef(f.peerId).get().catch(()=>null)));
+  wrap.innerHTML = friendsArr.map((f,i)=>{
+    const p = presences[i] && presences[i].exists ? presences[i].data() : null;
+    const online = isPresenceOnline(p);
+    const playingElsewhere = isPresencePlaying(p) && p.roomId !== currentRoomId;
+    let action;
+    if(invitedInThisRoom.has(f.peerId)) action = '<span class="status-chip chip-host">Terkirim</span>';
+    else if(playingElsewhere) action = '<span class="status-chip chip-off">Sedang Bermain</span>';
+    else if(!online) action = '<span class="status-chip chip-off">Offline</span>';
+    else action = `<button class="btn btn-primary" style="padding:8px 12px" onclick="inviteFriendFromLobby('${f.peerId}','${escapeAttr(f.peerDisplayName)}')">Undang</button>`;
+    return `<div class="player-slot">
+      <div class="avatar" style="background:${avatarColor(i)}">${f.peerAvatar || initials(f.peerDisplayName||'?')}</div>
+      <div class="slot-info"><div class="slot-name">${f.peerDisplayName} — ${online ? (playingElsewhere?'Sedang Bermain':'Online') : 'Offline'}</div></div>
+      ${action}
+    </div>`;
+  }).join('');
+}
+async function inviteFriendFromLobby(peerId, peerName){
+  if(!currentRoomId){ toast('Kamu belum berada di room.'); return; }
+  try{ await sendInviteDoc(peerId, peerName, currentRoomId); invitedInThisRoom.add(peerId); }
+  catch(e){ console.error(e); toast('Gagal mengirim undangan.'); }
+  renderInviteFromLobbyModal();
+}
+
+/* ---------- FRIEND ACTIONS (request / accept / reject / remove / block) ---------- */
+async function deleteFriendRelation(peerId){
+  await friendRelRef(myId, peerId).delete().catch(()=>{});
+  await writeIndexItem(myId, peerId, null);
+  await writeIndexItem(peerId, myId, null);
+  await refreshFriendData();
+  if(document.getElementById('friends').classList.contains('active')) switchFriendTab(currentFriendTab);
+}
+async function sendFriendRequest(peer){
+  if(!(await ensureFriendSystemReady())) return;
+  if(!peer || peer.uid===myId) return;
+  const already = myFriendIndex && myFriendIndex.items && myFriendIndex.items[peer.uid];
+  if(already){ toast(already.status==='accepted' ? 'Kalian sudah berteman.' : 'Permintaan sudah pernah dikirim.'); return; }
+  const myBlockList = await getBlocks(myId);
+  if(myBlockList.includes(peer.uid)){ toast('Buka blokir pemain ini dulu.'); return; }
+  const theirBlockList = await getBlocks(peer.uid);
+  if(theirBlockList.includes(myId)){ toast('Tidak dapat mengirim permintaan ke pemain ini.'); return; }
+  const rel = await friendRelRef(myId, peer.uid).get().catch(()=>null);
+  if(rel && rel.exists){ toast(rel.data().status==='accepted' ? 'Kalian sudah berteman.' : 'Permintaan sudah pernah dikirim.'); return; }
+  const now = Date.now();
+  await friendRelRef(myId, peer.uid).set({requester:myId, receiver:peer.uid, status:'pending', createdAt:now, updatedAt:now});
+  await writeIndexItem(myId, peer.uid, {peerId:peer.uid, peerUsername:peer.username, peerDisplayName:peer.displayName, peerAvatar:peer.avatar, status:'pending', direction:'outgoing', createdAt:now, updatedAt:now});
+  await writeIndexItem(peer.uid, myId, {peerId:myId, peerUsername:myProfile.username, peerDisplayName:myProfile.displayName, peerAvatar:myProfile.avatar, status:'pending', direction:'incoming', createdAt:now, updatedAt:now});
+  toast('Permintaan pertemanan terkirim ✓');
+  await refreshFriendData();
+  if(document.getElementById('friends').classList.contains('active')) switchFriendTab(currentFriendTab);
+}
+function sendFriendRequestFromSearch(idx){
+  const p = lastSearchResults[idx];
+  if(p) sendFriendRequest(p);
+}
+async function acceptFriendRequest(peerId){
+  if(!(await ensureFriendSystemReady())) return;
+  const rel = await friendRelRef(myId, peerId).get().catch(()=>null);
+  if(!rel || !rel.exists || rel.data().status!=='pending'){ toast('Permintaan tidak ditemukan.'); await refreshFriendData(); return; }
+  const now = Date.now();
+  await friendRelRef(myId, peerId).set({...rel.data(), status:'accepted', updatedAt:now});
+  const mine = await readIndexDoc(friendIndexRef(myId));
+  const mItem = mine.items[peerId] || {peerId};
+  mItem.status = 'accepted'; mItem.direction = 'friend'; mItem.updatedAt = now;
+  await writeIndexItem(myId, peerId, mItem);
+  const theirs = await readIndexDoc(friendIndexRef(peerId));
+  const tItem = theirs.items[myId] || {peerId:myId};
+  tItem.status = 'accepted'; tItem.direction = 'friend'; tItem.updatedAt = now;
+  await writeIndexItem(peerId, myId, tItem);
+  toast('Teman berhasil ditambahkan ✓');
+  await refreshFriendData();
+  if(document.getElementById('friends').classList.contains('active')) switchFriendTab(currentFriendTab);
+}
+async function rejectFriendRequest(peerId){
+  if(!(await ensureFriendSystemReady())) return;
+  await deleteFriendRelation(peerId);
+  toast('Permintaan ditolak.');
+}
+let currentFriendActionTarget = null;
+function openFriendActions(peerId, peerName){
+  currentFriendActionTarget = {peerId, peerName};
+  document.getElementById('removeFriendName').textContent = `Hapus ${peerName} dari daftar teman?`;
+  document.getElementById('blockFriendName').textContent = `${peerName} tidak akan bisa mengirim permintaan pertemanan atau undangan lagi.`;
+  openModal('friendActions');
+}
+async function confirmRemoveFriendAction(){
+  closeModal('confirmRemoveFriend');
+  if(!currentFriendActionTarget) return;
+  if(!(await ensureFriendSystemReady())) return;
+  await deleteFriendRelation(currentFriendActionTarget.peerId);
+  toast('Teman berhasil dihapus.');
+}
+async function blockPlayer(peerId){
+  if(!(await ensureFriendSystemReady())) return;
+  const doc = await blocksRef(myId).get().catch(()=>null);
+  const list = (doc && doc.exists && Array.isArray(doc.data().items)) ? doc.data().items.slice() : [];
+  if(!list.includes(peerId)) list.push(peerId);
+  await blocksRef(myId).set({items:list, updatedAt:Date.now()});
+  await deleteFriendRelation(peerId);
+  toast('Pemain diblokir.');
+}
+async function confirmBlockFriendAction(){
+  closeModal('confirmBlockFriend');
+  if(!currentFriendActionTarget) return;
+  await blockPlayer(currentFriendActionTarget.peerId);
+}
+async function unblockPlayer(peerId){
+  if(!(await ensureFriendSystemReady())) return;
+  const doc = await blocksRef(myId).get().catch(()=>null);
+  const list = ((doc && doc.exists && doc.data().items) || []).filter(id=>id!==peerId);
+  await blocksRef(myId).set({items:list, updatedAt:Date.now()});
+  toast('Blokir dibuka.');
+  await refreshFriendData();
+}
+
+/* ---------- PENCARIAN PEMAIN (berdasarkan username / nama pemain) ---------- */
+let lastSearchResults = [];
+let searchDebounceTimer = null;
+function onFriendSearchInput(){
+  clearTimeout(searchDebounceTimer);
+  const q = document.getElementById('friendSearchInput').value;
+  searchDebounceTimer = setTimeout(()=>searchPlayers(q), 350);
+}
+async function searchPlayers(rawQuery){
+  const query = (rawQuery||'').trim().toLowerCase().replace(/^@/, '');
+  if(query.length < 2){ renderSearchResults([], query); return; }
+  if(!sb){ renderSearchResults([], query, true); return; }
+  try{
+    const { data, error } = await sb.from('docs').select('data').like('path', 'profiles/%').limit(200);
+    if(error) throw error;
+    const results = (data||[])
+      .map(r=>r.data)
+      .filter(p=> p && p.uid!==myId && ((p.username||'').toLowerCase().includes(query) || (p.displayName||'').toLowerCase().includes(query)))
+      .slice(0, 20);
+    renderSearchResults(results, query);
+  }catch(e){ console.error(e); renderSearchResults([], query, true); }
+}
+function renderSearchResults(list, query, errored){
+  const wrap = document.getElementById('friendSearchWrap');
+  if(!wrap) return;
+  if(errored){ wrap.innerHTML = '<div class="empty-state">Pencarian gagal. Coba lagi.</div>'; return; }
+  if(!query){ wrap.innerHTML = ''; lastSearchResults = []; return; }
+  if(!list.length){ wrap.innerHTML = '<div class="empty-state">Pemain tidak ditemukan.</div>'; lastSearchResults = []; return; }
+  lastSearchResults = list;
+  const blockSet = new Set(myBlocks||[]);
+  wrap.innerHTML = list.map((p,idx)=>{
+    const rel = myFriendIndex && myFriendIndex.items ? myFriendIndex.items[p.uid] : null;
+    let actionHtml;
+    if(blockSet.has(p.uid)) actionHtml = '<span class="status-chip chip-off">Diblokir</span>';
+    else if(!rel) actionHtml = `<button class="btn btn-primary" style="padding:8px 12px" onclick="sendFriendRequestFromSearch(${idx})">Tambah Teman</button>`;
+    else if(rel.status==='accepted') actionHtml = '<span class="status-chip chip-ready">Teman</span>';
+    else if(rel.direction==='outgoing') actionHtml = '<span class="status-chip chip-host">Terkirim</span>';
+    else actionHtml = `<button class="btn btn-primary" style="padding:8px 12px" onclick="acceptFriendRequest('${p.uid}')">Terima</button>`;
+    return `<div class="player-slot">
+      <div class="avatar" style="background:${avatarColor(idx)}">${p.avatar || initials(p.displayName||'?')}</div>
+      <div class="slot-info"><div class="slot-name">${p.displayName}</div><div class="card-count">@${p.username}</div></div>
+      ${actionHtml}
+    </div>`;
+  }).join('');
+}
+
+/* ---------- RENDER: HALAMAN TEMAN ---------- */
+let currentFriendTab = 'list';
+let friendsPollTimer = null;
+function switchFriendTab(tab){
+  currentFriendTab = tab;
+  document.querySelectorAll('.friend-tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  document.querySelectorAll('.friend-tab-panel').forEach(p=>{ p.style.display = (p.dataset.tab===tab) ? 'block' : 'none'; });
+  if(tab==='list') renderFriendList();
+  if(tab==='requests') renderFriendRequests();
+  if(tab==='search'){ const inp = document.getElementById('friendSearchInput'); if(inp) inp.focus(); }
+}
+async function renderFriendList(){
+  const container = document.getElementById('friendListWrap');
+  if(!container) return;
+  const items = Object.values((myFriendIndex && myFriendIndex.items) || {}).filter(i=>i.status==='accepted');
+  if(!items.length){
+    container.innerHTML = '<div class="empty-state">Belum ada teman<br>Cari teman untuk mulai bermain bersama.<br><button class="btn btn-secondary" style="margin-top:10px" onclick="switchFriendTab(\'search\')">Cari Pemain</button></div>';
+    return;
+  }
+  container.innerHTML = '<div class="skeleton skeleton-slot"></div>';
+  const presences = await Promise.all(items.map(i=>presenceRef(i.peerId).get().catch(()=>null)));
+  container.innerHTML = items.map((i,idx)=>{
+    const p = presences[idx] && presences[idx].exists ? presences[idx].data() : null;
+    const online = isPresenceOnline(p);
+    const playing = isPresencePlaying(p);
+    const statusHtml = playing
+      ? '<span class="status-chip chip-host">🟡 Sedang Bermain</span>'
+      : online
+        ? '<span class="status-chip chip-online-dot"><span class="dot-online"></span>Online</span>'
+        : '<span class="status-chip chip-off">⚪ Offline</span>';
+    return `<div class="player-slot">
+      <div class="avatar" style="background:${avatarColor(idx)}">${i.peerAvatar || initials(i.peerDisplayName||'?')}</div>
+      <div class="slot-info"><div class="slot-name">${i.peerDisplayName}</div><div class="card-count">@${i.peerUsername}</div></div>
+      ${statusHtml}
+      <button class="btn btn-secondary" style="padding:8px 12px" onclick="inviteFriendToPlay('${i.peerId}','${escapeAttr(i.peerDisplayName)}')">Ajak Main</button>
+      <button class="icon-mini-btn" onclick="openFriendActions('${i.peerId}','${escapeAttr(i.peerDisplayName)}')" aria-label="Opsi teman">⋯</button>
+    </div>`;
+  }).join('');
+}
+function renderFriendRequests(){
+  const wrap = document.getElementById('friendReqWrap');
+  if(!wrap) return;
+  const items = Object.values((myFriendIndex && myFriendIndex.items) || {});
+  const incoming = items.filter(i=>i.status==='pending' && i.direction==='incoming');
+  const outgoing = items.filter(i=>i.status==='pending' && i.direction==='outgoing');
+  let html = '';
+  if(incoming.length){
+    html += '<div class="field-label">Permintaan Masuk</div>' + incoming.map(i=>`
+      <div class="player-slot">
+        <div class="avatar" style="background:var(--blue)">${i.peerAvatar || initials(i.peerDisplayName||'?')}</div>
+        <div class="slot-info"><div class="slot-name">${i.peerDisplayName}</div><div class="card-count">@${i.peerUsername}</div></div>
+        <button class="btn btn-secondary" style="padding:8px 12px" onclick="rejectFriendRequest('${i.peerId}')">Tolak</button>
+        <button class="btn btn-primary" style="padding:8px 12px" onclick="acceptFriendRequest('${i.peerId}')">Terima</button>
+      </div>`).join('');
+  }
+  if(outgoing.length){
+    html += '<div class="field-label" style="margin-top:14px">Menunggu Konfirmasi</div>' + outgoing.map(i=>`
+      <div class="player-slot">
+        <div class="avatar" style="background:var(--green)">${i.peerAvatar || initials(i.peerDisplayName||'?')}</div>
+        <div class="slot-info"><div class="slot-name">${i.peerDisplayName}</div><div class="card-count">@${i.peerUsername}</div></div>
+        <span class="status-chip chip-host">Permintaan Terkirim</span>
+        <button class="icon-mini-btn" onclick="rejectFriendRequest('${i.peerId}')">Batal</button>
+      </div>`).join('');
+  }
+  wrap.innerHTML = html || '<div class="empty-state">Tidak ada permintaan pertemanan baru.</div>';
+}
+
+/* ---------- START / STOP siklus hidup Friend System ---------- */
+function startFriendSystem(){
+  startBadgePolling();
+  subscribeInvites();
+  if(presenceHeartbeatTimer) clearInterval(presenceHeartbeatTimer);
+  updatePresenceNow();
+  presenceHeartbeatTimer = setInterval(updatePresenceNow, 20000);
+}
+function stopFriendSystem(){
+  if(badgePollTimer) clearInterval(badgePollTimer); badgePollTimer = null;
+  if(presenceHeartbeatTimer) clearInterval(presenceHeartbeatTimer); presenceHeartbeatTimer = null;
+  if(inviteUnsub){ inviteUnsub(); inviteUnsub = null; }
+  if(friendsPollTimer){ clearInterval(friendsPollTimer); friendsPollTimer = null; }
+  myFriendIndex = null; myBlocks = []; myInvites = {};
+  updateFriendBadge();
+}
+
+/* ================= TAHAP 10 — STATISTIK, LEADERBOARD, RIWAYAT & ACHIEVEMENT =================
+   Prinsip: seluruh angka (menang/kalah/statistik kartu/achievement/peringkat) dibaca
+   lewat RPC SECURITY DEFINER (get_my_stats/get_my_achievements/get_leaderboard/
+   get_friend_leaderboard/get_match_history/get_match_detail/get_my_rank) yang dihitung
+   & dikunci di server sejak dalam game_action() (lihat tahap10-stats-leaderboard-rpc.sql).
+   Client di sini murni menampilkan, tidak pernah menghitung atau menyimpan statistik. */
+
+const ACH_ICONS = { first_match:'🎮', first_win:'🏆', play_10:'🔟', first_uno:'❗', win_5:'⭐' };
+
+async function loadMyStats(){
+  const grid = document.getElementById('statsGrid');
+  if(!grid) return;
+  try{
+    const { data, error } = await sb.rpc('get_my_stats');
+    if(error) throw error;
+    grid.innerHTML = `
+      <div class="stat-box stat-winrate"><div class="stat-val">${data.winRate}%</div><div class="stat-label">Win Rate</div></div>
+      <div class="stat-box"><div class="stat-val">${data.totalMatches}</div><div class="stat-label">Total Main</div></div>
+      <div class="stat-box"><div class="stat-val">${data.wins}</div><div class="stat-label">Menang</div></div>
+      <div class="stat-box"><div class="stat-val">${data.losses}</div><div class="stat-label">Kalah</div></div>
+      <div class="stat-box"><div class="stat-val">${data.unoCount}</div><div class="stat-label">UNO!</div></div>
+      <div class="stat-box"><div class="stat-val">${data.cardsPlayed}</div><div class="stat-label">Kartu Dimainkan</div></div>
+    `;
+  }catch(e){ console.error(e); grid.innerHTML = '<div class="empty-state" style="grid-column:span 2">Gagal memuat statistik.</div>'; }
+}
+
+async function loadMyAchievements(){
+  const grid = document.getElementById('achGrid');
+  if(!grid) return;
+  try{
+    const { data, error } = await sb.rpc('get_my_achievements');
+    if(error) throw error;
+    grid.innerHTML = (data||[]).map(a=>`
+      <div class="ach-badge ${a.unlocked?'unlocked':''}" title="${escapeAttr(a.description)}">
+        <div class="ach-icon">${ACH_ICONS[a.achievement_id]||'🏅'}</div>
+        <div class="ach-name">${a.name}</div>
+      </div>`).join('');
+  }catch(e){ console.error(e); grid.innerHTML = '<div class="empty-state">Gagal memuat achievement.</div>'; }
+}
+
+/* ---------- LEADERBOARD ---------- */
+function goLeaderboard(){
+  if(!myProfile){ toast('Masuk dulu untuk melihat leaderboard.'); go('login'); return; }
+  go('leaderboard');
+}
+let currentLeaderboardTab = 'global';
+function switchLeaderboardTab(tab){
+  currentLeaderboardTab = tab;
+  document.querySelectorAll('#leaderboard .friend-tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.lbtab===tab));
+  loadLeaderboard();
+}
+async function loadLeaderboard(){
+  const wrap = document.getElementById('leaderboardWrap');
+  const pill = document.getElementById('myRankPill');
+  if(!wrap) return;
+  wrap.innerHTML = '<div class="skeleton skeleton-slot"></div><div class="skeleton skeleton-slot"></div>';
+  if(pill) pill.style.display = 'none';
+  try{
+    if(currentLeaderboardTab==='global'){
+      const [leaderboardRes, rankRes] = await Promise.all([
+        sb.rpc('get_leaderboard', {p_limit:50, p_offset:0}),
+        sb.rpc('get_my_rank')
+      ]);
+      if(leaderboardRes.error) throw leaderboardRes.error;
+      if(pill && rankRes && !rankRes.error && rankRes.data && rankRes.data.hasRank){
+        pill.style.display = 'block';
+        pill.textContent = 'Peringkatmu: #' + rankRes.data.rank;
+      }
+      renderLeaderboardList(leaderboardRes.data||[]);
+    } else {
+      const { data, error } = await sb.rpc('get_friend_leaderboard');
+      if(error) throw error;
+      renderLeaderboardList((data||[]).map((r,i)=>({...r, rank:i+1})));
+    }
+  }catch(e){ console.error(e); wrap.innerHTML = '<div class="empty-state">Gagal memuat leaderboard.</div>'; }
+}
+function renderLeaderboardList(list){
+  const wrap = document.getElementById('leaderboardWrap');
+  if(!wrap) return;
+  if(!list.length){ wrap.innerHTML = '<div class="empty-state">Belum ada data pertandingan.</div>'; return; }
+  const medal = ['🥇','🥈','🥉'];
+  wrap.innerHTML = list.map((r,idx)=>`
+    <div class="lb-row ${r.user_id===myId?'me':''}">
+      <div class="lb-rank">${r.rank<=3?medal[r.rank-1]:r.rank}</div>
+      <div class="avatar" style="background:${avatarColor(idx)}">${initials(r.player_name||'?')}</div>
+      <div class="lb-info"><div class="lb-name">${r.player_name}</div><div class="lb-sub">${r.total_matches} main</div></div>
+      <div class="lb-wins">${r.wins}<small>${r.win_rate}% WR</small></div>
+    </div>`).join('');
+}
+
+/* ---------- RIWAYAT PERTANDINGAN ---------- */
+async function loadMatchHistory(){
+  const wrap = document.getElementById('matchHistoryWrap');
+  if(!wrap) return;
+  wrap.innerHTML = '<div class="skeleton skeleton-slot"></div><div class="skeleton skeleton-slot"></div>';
+  try{
+    const { data, error } = await sb.rpc('get_match_history', {p_limit:20, p_offset:0});
+    if(error) throw error;
+    if(!data || !data.length){ wrap.innerHTML = '<div class="empty-state">Belum ada riwayat pertandingan.</div>'; return; }
+    wrap.innerHTML = data.map(m=>{
+      const isWin = m.result==='win';
+      const date = new Date(m.finished_at).toLocaleDateString('id-ID', {day:'numeric', month:'short', year:'numeric'});
+      return `<div class="mh-row" onclick="openMatchDetail('${m.match_id}')">
+        <span class="mh-result ${isWin?'win':'loss'}">${isWin?'Menang':'Kalah'}</span>
+        <div class="mh-info"><div class="mh-sub">${m.player_count} pemain · Pemenang: ${escapeAttr(m.winner_name||'-')}</div><div class="mh-date">${date}</div></div>
+        <span class="mh-chevron">›</span>
+      </div>`;
+    }).join('');
+  }catch(e){ console.error(e); wrap.innerHTML = '<div class="empty-state">Gagal memuat riwayat.</div>'; }
+}
+
+async function openMatchDetail(matchId){
+  const sum = document.getElementById('matchDetailSummary');
+  const list = document.getElementById('matchDetailPlayers');
+  sum.innerHTML = '';
+  list.innerHTML = '<div class="skeleton skeleton-slot"></div>';
+  openModal('matchDetail');
+  try{
+    const { data, error } = await sb.rpc('get_match_detail', {p_match_id: matchId});
+    if(error) throw error;
+    const mins = data.durationSeconds!=null ? Math.round(data.durationSeconds/60) : null;
+    sum.innerHTML = `
+      <div>Pemain<strong>${data.playerCount}</strong></div>
+      <div>Durasi<strong>${mins!=null ? mins+' menit' : '-'}</strong></div>
+      <div>Tanggal<strong>${new Date(data.finishedAt).toLocaleDateString('id-ID',{day:'numeric',month:'short'})}</strong></div>
+    `;
+    list.innerHTML = (data.players||[]).map(p=>`
+      <div class="md-row">
+        <div class="md-pos">${p.position===1?'🏆':'#'+p.position}</div>
+        <div class="md-name">${p.name||'Pemain'}</div>
+        <div class="md-cards">${p.cardCount} kartu</div>
+      </div>`).join('');
+  }catch(e){ console.error(e); list.innerHTML = '<div class="empty-state">Gagal memuat detail pertandingan.</div>'; }
+}
+
+
+/* ================= TAHAP 11 — REALTIME VOICE CHAT (layer terpisah dari game engine) =================
+   Menggunakan WebRTC untuk audio (peer-to-peer, tidak lewat database) dan Supabase Realtime
+   channel (broadcast + presence) HANYA untuk signaling (SDP offer/answer/ICE) dan status
+   mic/speaking — bukan untuk mengirim audio itu sendiri. Tidak ada rekaman yang disimpan.
+   Modul ini tidak pernah mengubah state game (localRoom.status/currentPlayerId/dll). */
+const Voice = {
+  channel: null,
+  localStream: null,
+  peers: {},              // peerId -> {pc, audioEl, micOn, speaking, mutedByMe, volume}
+  presenceState: {},      // peerId -> {group, mic, name} dari presence channel
+  micOn: false,
+  speakerOn: true,
+  status: 'idle',         // idle | connecting | connected | error
+  duckingEnabled: true,   // item 35: kecilkan sound effect saat ada yang bicara
+  anyoneSpeaking: false,
+  needsAutoplayUnlock: false, // item 31: browser butuh interaksi user untuk memutar audio remote
+  outputDeviceId: null,   // item 32: audio output yang dipilih (jika browser mendukung setSinkId)
+  audioCtx: null, analyser: null, rafId: null, wasSpeaking: false,
+  _micResolve: null,
+  ICE: [{urls:'stun:stun.l.google.com:19302'}, {urls:'stun:stun1.l.google.com:19302'}],
+
+  openPanel(){
+    if(!currentRoomId){ return; }
+    openModal('voice');
+    this.renderPanel();
+  },
+
+  computeMyGroup(){
+    if(!localRoom || (localRoom.gameMode||'normal')!=='team') return 'all';
+    const idx = localRoom.players.findIndex(p=>p.id===myId);
+    return idx<2 ? 'team-a' : 'team-b';
+  },
+  groupOf(peerId){
+    if(!localRoom || (localRoom.gameMode||'normal')!=='team') return 'all';
+    const idx = localRoom.players.findIndex(p=>p.id===peerId);
+    return idx<2 ? 'team-a' : 'team-b';
+  },
+  isReachable(peerId){
+    if(!localRoom || (localRoom.gameMode||'normal')!=='team') return true;
+    if(localRoom.voiceConnectOpponent) return true;
+    return this.groupOf(peerId)===this.computeMyGroup();
+  },
+
+  async toggleConnect(){
+    if(this.status==='connected' || this.status==='connecting'){ this.disconnectAll(); return; }
+    await this.connect();
+  },
+
+  async connect(){
+    if(!currentRoomId || !myId){ toast('Belum terhubung ke room.'); return; }
+    if(!localRoom || !localRoom.players.some(p=>p.id===myId)){ toast('Kamu bukan bagian dari room ini.'); return; }
+    if(!this.localStream){
+      const ok = await this.ensureMic();
+      if(!ok) return;
+    }
+    this.status = 'connecting'; this.renderPanel();
+    this.micOn = true;
+    this.localStream.getAudioTracks().forEach(t=>t.enabled=true);
+    this.setupLocalAnalyser();
+    this.joinChannel();
+  },
+
+  ensureMic(){
+    return new Promise(resolve=>{
+      this._micResolve = resolve;
+      const body = document.getElementById('micpermBody');
+      const btn = document.getElementById('micpermActionBtn');
+      body.textContent = 'Izinkan microphone untuk menggunakan Voice Chat.';
+      btn.textContent = 'Izinkan';
+      openModal('micperm');
+    });
+  },
+
+  async requestMicFromModal(){
+    try{
+      const stream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true, noiseSuppression:true, autoGainControl:true}, video:false});
+      this.localStream = stream;
+      closeModal('micperm');
+      if(this._micResolve){ this._micResolve(true); this._micResolve=null; }
+    }catch(e){
+      console.error(e);
+      const body = document.getElementById('micpermBody');
+      const btn = document.getElementById('micpermActionBtn');
+      if(e && e.name==='NotFoundError'){ body.textContent = 'Microphone tidak ditemukan.'; }
+      else { body.textContent = 'Microphone tidak diizinkan.'; }
+      btn.textContent = 'Coba Lagi';
+      if(this._micResolve){ this._micResolve(false); this._micResolve=null; }
+    }
+  },
+
+  cancelMicRequest(){
+    closeModal('micperm');
+    if(this._micResolve){ this._micResolve(false); this._micResolve=null; }
+  },
+
+  setupLocalAnalyser(){
+    try{
+      if(!this.audioCtx) this.audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+      const src = this.audioCtx.createMediaStreamSource(this.localStream);
+      this.analyser = this.audioCtx.createAnalyser();
+      this.analyser.fftSize = 512;
+      src.connect(this.analyser);
+      const data = new Uint8Array(this.analyser.frequencyBinCount);
+      const loop = ()=>{
+        if(!this.analyser) return;
+        this.analyser.getByteFrequencyData(data);
+        let sum=0; for(let i=0;i<data.length;i++) sum+=data[i];
+        const level = sum/data.length;
+        const speakingNow = this.micOn && level>18;
+        if(speakingNow!==this.wasSpeaking){
+          this.wasSpeaking = speakingNow;
+          this.broadcastSpeaking(speakingNow);
+          this.updateSpeakingUI(myId, speakingNow);
+        }
+        this.rafId = requestAnimationFrame(loop);
+      };
+      loop();
+    }catch(e){ console.error(e); }
+  },
+
+  broadcastSpeaking(speaking){
+    if(this.channel) this.channel.send({type:'broadcast', event:'speak', payload:{from:myId, speaking}});
+  },
+
+  joinChannel(){
+    if(this.channel) return;
+    const name = 'voice_' + currentRoomId;
+    this.channel = sb.channel(name, {config:{broadcast:{self:false}, presence:{key:myId}}});
+    this.channel
+      .on('broadcast', {event:'signal'}, ({payload})=>{ if(payload && payload.to===myId) this.handleSignal(payload); })
+      .on('broadcast', {event:'speak'}, ({payload})=>{ if(payload) this.updateSpeakingUI(payload.from, !!payload.speaking); })
+      .on('presence', {event:'sync'}, ()=> this.onPresenceSync())
+      .on('presence', {event:'leave'}, ({key})=> this.onPeerLeft(key))
+      .subscribe(async status=>{
+        if(status==='SUBSCRIBED'){
+          await this.channel.track({group:this.computeMyGroup(), mic:this.micOn, name:(myProfile&&myProfile.displayName)||'Pemain'});
+          this.status='connected';
+          this.renderPanel(); this.renderBadge(); this.updateFabVisibility();
+        } else if(status==='CHANNEL_ERROR' || status==='TIMED_OUT'){
+          this.status='error'; this.renderPanel();
+          toast('Voice tidak dapat terhubung.');
+        }
+      });
+  },
+
+  onPresenceSync(){
+    if(!this.channel) return;
+    const state = this.channel.presenceState();
+    // Item 16 (keamanan): hanya percaya presence dari id yang benar-benar anggota room ini.
+    const validIds = new Set((localRoom && localRoom.players || []).map(p=>p.id));
+    Object.keys(state).forEach(peerId=>{
+      if(peerId===myId || !validIds.has(peerId)) return;
+      const prevMeta = this.presenceState[peerId];
+      const meta = (state[peerId] && state[peerId][0]) || {};
+      const pname = (localRoom.players.find(p=>p.id===peerId)||{}).name || meta.name || 'Pemain';
+      if(!prevMeta) toast(pname + ' bergabung ke Voice'); // item 43 — notifikasi ringan, hanya saat join
+      else if(prevMeta.mic !== meta.mic) toast(pname + (meta.mic ? ' mengaktifkan microphone' : ' mematikan microphone'));
+      this.presenceState[peerId] = meta;
+      if(this.isReachable(peerId) && !this.peers[peerId]) this.createPeer(peerId, myId<peerId);
+      else if(!this.isReachable(peerId) && this.peers[peerId]) this.closePeer(peerId);
+    });
+    Object.keys(this.peers).forEach(pid=>{ if(!state[pid]) this.closePeer(pid); });
+    Object.keys(this.presenceState).forEach(pid=>{ if(!state[pid]) delete this.presenceState[pid]; });
+    this.renderPanel();
+  },
+
+  onPeerLeft(peerId){
+    const pname = (localRoom && localRoom.players.find(p=>p.id===peerId)||{}).name || 'Pemain';
+    if(this.presenceState[peerId]) toast(pname + ' keluar dari Voice'); // item 43
+    delete this.presenceState[peerId];
+    this.closePeer(peerId);
+    this.renderPanel();
+  },
+
+  createPeer(peerId, iInitiate){
+    if(this.peers[peerId] || !this.localStream) return;
+    const pc = new RTCPeerConnection({iceServers:this.ICE});
+    const entry = {pc, audioEl:null, micOn:true, speaking:false, mutedByMe:false, volume:1};
+    this.peers[peerId] = entry;
+    this.localStream.getTracks().forEach(t=>pc.addTrack(t, this.localStream));
+    pc.onicecandidate = e=>{ if(e.candidate) this.sendSignal(peerId, 'ice', e.candidate); };
+    pc.ontrack = e=>{
+      if(!entry.audioEl){
+        const audioEl = document.createElement('audio');
+        audioEl.autoplay = true; audioEl.playsInline = true; audioEl.muted = !this.speakerOn;
+        audioEl.style.display = 'none';
+        document.body.appendChild(audioEl);
+        entry.audioEl = audioEl;
+        if(this.outputDeviceId && audioEl.setSinkId) audioEl.setSinkId(this.outputDeviceId).catch(()=>{});
+      }
+      entry.audioEl.srcObject = e.streams[0];
+      const p = entry.audioEl.play();
+      if(p && p.catch) p.catch(()=>{ this.needsAutoplayUnlock = true; this.renderPanel(); }); // item 31
+    };
+    pc.oniceconnectionstatechange = ()=>{
+      if(pc.iceConnectionState==='failed' || pc.iceConnectionState==='disconnected'){
+        if(!entry.unstableNotified){ entry.unstableNotified = true; toast('Koneksi voice tidak stabil.'); }
+        if(iInitiate && pc.restartIce){ try{ pc.restartIce(); }catch(err){} }
+      } else if(pc.iceConnectionState==='connected' || pc.iceConnectionState==='completed'){
+        entry.unstableNotified = false;
+      }
+      this.renderPanel();
+    };
+    if(iInitiate){
+      pc.onnegotiationneeded = async ()=>{
+        try{
+          const offer = await pc.createOffer();
+          await pc.setLocalDescription(offer);
+          this.sendSignal(peerId, 'offer', pc.localDescription);
+        }catch(e){ console.error(e); }
+      };
+    }
+  },
+
+  sendSignal(to, kind, data){
+    if(this.channel) this.channel.send({type:'broadcast', event:'signal', payload:{to, from:myId, kind, data}});
+  },
+
+  async handleSignal(payload){
+    const {from, kind, data} = payload;
+    const validIds = new Set((localRoom && localRoom.players || []).map(p=>p.id));
+    if(!validIds.has(from) || !this.localStream) return; // item 16
+    if(!this.peers[from]) this.createPeer(from, false);
+    const pc = this.peers[from].pc;
+    try{
+      if(kind==='offer'){
+        await pc.setRemoteDescription(new RTCSessionDescription(data));
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        this.sendSignal(from, 'answer', pc.localDescription);
+      } else if(kind==='answer'){
+        await pc.setRemoteDescription(new RTCSessionDescription(data));
+      } else if(kind==='ice'){
+        await pc.addIceCandidate(new RTCIceCandidate(data));
+      }
+    }catch(e){ console.error(e); }
+  },
+
+  closePeer(peerId){
+    const entry = this.peers[peerId];
+    if(!entry) return;
+    try{ entry.pc.close(); }catch(e){}
+    if(entry.audioEl){ entry.audioEl.srcObject=null; entry.audioEl.remove(); }
+    delete this.peers[peerId];
+  },
+
+  disconnectAll(){
+    Object.keys(this.peers).forEach(pid=>this.closePeer(pid));
+    if(this.channel && sb){ sb.removeChannel(this.channel); }
+    this.channel = null;
+    if(this.localStream){ this.localStream.getTracks().forEach(t=>t.stop()); this.localStream=null; }
+    if(this.rafId){ cancelAnimationFrame(this.rafId); this.rafId=null; }
+    if(this.audioCtx){ this.audioCtx.close().catch(()=>{}); this.audioCtx=null; }
+    this.analyser = null; this.wasSpeaking = false;
+    this.status = 'idle'; this.micOn = false;
+    this.presenceState = {};
+    this.renderPanel(); this.renderBadge(); this.updateFabVisibility();
+  },
+
+  toggleMic(){
+    if(this.status!=='connected'){ toast('Sambungkan voice terlebih dahulu.'); return; }
+    this.micOn = !this.micOn;
+    if(this.localStream) this.localStream.getAudioTracks().forEach(t=>t.enabled=this.micOn);
+    if(this.channel) this.channel.track({group:this.computeMyGroup(), mic:this.micOn, name:(myProfile&&myProfile.displayName)||'Pemain'});
+    this.renderPanel();
+  },
+
+  toggleSpeaker(){
+    this.speakerOn = !this.speakerOn;
+    Object.values(this.peers).forEach(p=>{ if(p.audioEl) p.audioEl.muted = p.mutedByMe || !this.speakerOn; });
+    this.renderPanel();
+  },
+
+  setPeerVolume(peerId, val){
+    const p = this.peers[peerId];
+    if(!p) return;
+    p.volume = +val;
+    if(p.audioEl) p.audioEl.volume = +val;
+  },
+
+  toggleMutePeer(peerId){
+    const p = this.peers[peerId];
+    if(!p) return;
+    p.mutedByMe = !p.mutedByMe;
+    if(p.audioEl) p.audioEl.muted = p.mutedByMe || !this.speakerOn;
+    this.renderPanel();
+  },
+
+  toggleDucking(){ this.duckingEnabled = !this.duckingEnabled; this.renderPanel(); },
+
+  // Item 31: beberapa browser memblokir autoplay audio remote sebelum ada interaksi user.
+  unlockAudio(){
+    if(this.audioCtx && this.audioCtx.state==='suspended') this.audioCtx.resume().catch(()=>{});
+    Object.values(this.peers).forEach(p=>{ if(p.audioEl) p.audioEl.play().catch(()=>{}); });
+    this.needsAutoplayUnlock = false;
+    this.renderPanel();
+  },
+
+  // Item 32: pemilihan perangkat output audio, hanya ditampilkan jika browser mendukung setSinkId.
+  supportsOutputSelect(){ return typeof HTMLMediaElement!=='undefined' && !!HTMLMediaElement.prototype.setSinkId; },
+  async loadOutputDevices(){
+    if(!this.supportsOutputSelect() || !navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return [];
+    try{
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      return devices.filter(d=>d.kind==='audiooutput');
+    }catch(e){ return []; }
+  },
+  async setOutputDevice(deviceId){
+    this.outputDeviceId = deviceId || null;
+    for(const p of Object.values(this.peers)){
+      if(p.audioEl && p.audioEl.setSinkId){ try{ await p.audioEl.setSinkId(this.outputDeviceId||''); }catch(e){} }
+    }
+  },
+
+  askConnectOpponent(){
+    if(localRoom && localRoom.voiceConnectOpponent) this.setConnectOpponent(false);
+    else openModal('connectopp');
+  },
+  confirmConnectOpponent(){ this.setConnectOpponent(true); },
+  async setConnectOpponent(val){
+    await withLock(async()=>{
+      const fresh = await roomRef().get();
+      if(!fresh.exists) return;
+      const d = fresh.data();
+      d.voiceConnectOpponent = val;
+      d.log.push(val ? 'Voice tim disambungkan dengan lawan.' : 'Voice tim diputuskan dari lawan.'); trimLog(d);
+      await roomRef().update({voiceConnectOpponent:d.voiceConnectOpponent, log:d.log});
+    });
+  },
+
+  onRoomUpdate(){
+    if(this.status==='connected'){
+      this.onPresenceSync();
+      if(this.channel) this.channel.track({group:this.computeMyGroup(), mic:this.micOn, name:(myProfile&&myProfile.displayName)||'Pemain'});
+    }
+    this.renderBadge();
+    this.updateFabVisibility();
+    if(document.getElementById('modal-voice').classList.contains('active')) this.renderPanel();
+  },
+
+  updateFabVisibility(){
+    const fab = document.getElementById('voiceFab');
+    if(!fab) return;
+    const onRoomScreen = document.getElementById('game').classList.contains('active') || document.getElementById('lobby').classList.contains('active');
+    fab.style.display = (currentRoomId && onRoomScreen) ? 'flex' : 'none';
+    fab.classList.toggle('live', this.status==='connected');
+    document.getElementById('voiceFabCount').textContent = this.status==='connected' ? String(Object.keys(this.peers).length+1) : '';
+  },
+
+  updateSpeakingUI(peerId, speaking){
+    if(this.peers[peerId]) this.peers[peerId].speaking = speaking;
+    if(peerId===myId) this.wasSpeaking = speaking;
+    this.anyoneSpeaking = this.wasSpeaking || Object.values(this.peers).some(p=>p.speaking); // item 35
+    if(localRoom){
+      if(peerId===myId){
+        const el = document.getElementById('myLabel');
+        if(el) el.classList.toggle('speaking-ring', speaking);
+      } else {
+        const opponents = localRoom.players.filter(p=>p.id!==myId);
+        const oi = opponents.findIndex(p=>p.id===peerId);
+        const oppRows = document.querySelectorAll('#opponentsWrap .opponent-row .avatar');
+        if(oi>-1 && oppRows[oi]) oppRows[oi].classList.toggle('speaking-ring', speaking);
+      }
+    }
+    const row = document.querySelector(`.voice-player-row[data-pid="${peerId}"] .avatar`);
+    if(row) row.classList.toggle('speaking-ring', speaking);
+  },
+
+  renderBadge(){
+    const badge = document.getElementById('voiceModeBadge');
+    if(!badge) return;
+    if(!localRoom){ badge.style.display='none'; return; }
+    const mode = localRoom.gameMode||'normal';
+    let label;
+    if(mode==='team') label = localRoom.voiceConnectOpponent ? 'Semua Terhubung' : 'Team Only';
+    else if(mode==='persaudaraan') label = 'Group';
+    else label = this.status==='connected' ? 'Terhubung' : 'Normal';
+    badge.textContent = '🎙 ' + label;
+    badge.style.display = 'inline-block';
+  },
+
+  renderPanel(){
+    const statusRow = document.getElementById('voiceStatusRow');
+    if(!statusRow) return;
+    const statusText = document.getElementById('voiceStatusText');
+    const connectBtn = document.getElementById('voiceConnectBtn');
+    const micBtn = document.getElementById('voiceMicBtn');
+    const speakerBtn = document.getElementById('voiceSpeakerBtn');
+    const oppBox = document.getElementById('voiceOpponentBox');
+    const oppLbl = document.getElementById('voiceOpponentLabel');
+    const oppBtn = document.getElementById('voiceOpponentBtn');
+    const list = document.getElementById('voicePlayerList');
+    const unlockBanner = document.getElementById('voiceUnlockBanner');
+    const extra = document.getElementById('voiceExtraOptions');
+
+    unlockBanner.style.display = this.needsAutoplayUnlock ? 'block' : 'none';
+
+    if(this.status==='connected'){
+      let outputHtml = '';
+      if(this.supportsOutputSelect()){
+        if(!this._outputDevices){
+          this.loadOutputDevices().then(devs=>{ this._outputDevices = devs; this.renderPanel(); });
+        } else if(this._outputDevices.length){
+          outputHtml = `<div class="voice-p-sub" style="margin-top:8px">Output Audio</div>
+            <select class="field-input" style="padding:8px" onchange="Voice.setOutputDevice(this.value)">
+              <option value="">Default</option>
+              ${this._outputDevices.map(d=>`<option value="${d.deviceId}" ${d.deviceId===this.outputDeviceId?'selected':''}>${d.label||'Speaker/Headset'}</option>`).join('')}
+            </select>`;
+        }
+      }
+      extra.innerHTML = `<button class="voice-mute-btn ${this.duckingEnabled?'on':''}" style="width:100%;padding:8px" onclick="Voice.toggleDucking()">Ducking Voice: ${this.duckingEnabled?'ON':'OFF'}</button>${outputHtml}`;
+    } else { extra.innerHTML = ''; }
+
+    statusRow.className = 'voice-status-row ' + (this.status==='connected'?'on':this.status==='connecting'?'connecting':this.status==='error'?'error':'');
+    statusText.textContent = this.status==='connected' ? 'Voice Terhubung' : this.status==='connecting' ? 'Menghubungkan Voice...' : this.status==='error' ? 'Voice gagal terhubung' : 'Voice belum terhubung';
+    connectBtn.querySelector('span:last-child').textContent = (this.status==='connected'||this.status==='connecting') ? 'Keluar' : 'Voice';
+    connectBtn.classList.toggle('active', this.status==='connected');
+    micBtn.classList.toggle('active', this.micOn && this.status==='connected');
+    micBtn.classList.toggle('muted', this.status==='connected' && !this.micOn);
+    micBtn.querySelector('span:last-child').textContent = this.micOn ? 'Mic Aktif' : 'Mic Mati';
+    speakerBtn.classList.toggle('active', this.speakerOn);
+    speakerBtn.querySelector('span:last-child').textContent = this.speakerOn ? 'Speaker' : 'Speaker Mati';
+
+    const mode = localRoom ? (localRoom.gameMode||'normal') : 'normal';
+    if(mode==='team' && this.status==='connected'){
+      oppBox.style.display = 'block';
+      const connected = !!(localRoom && localRoom.voiceConnectOpponent);
+      oppLbl.textContent = connected ? 'Voice dengan Lawan Aktif' : 'Team Voice Only';
+      oppBtn.textContent = connected ? 'Putuskan dari Lawan' : 'Sambungkan ke Lawan';
+    } else { oppBox.style.display = 'none'; }
+
+    if(!localRoom){ list.innerHTML=''; return; }
+    list.innerHTML = localRoom.players.map((p,i)=>{
+      const isMe = p.id===myId;
+      const pres = this.presenceState[p.id];
+      const inVoice = isMe ? this.status==='connected' : !!pres;
+      const micOnState = isMe ? this.micOn : (pres ? !!pres.mic : false);
+      const peerEntry = this.peers[p.id];
+      const speaking = isMe ? this.wasSpeaking : (peerEntry ? peerEntry.speaking : false);
+      const volumePct = peerEntry ? Math.round((peerEntry.volume!=null?peerEntry.volume:1)*100) : 100;
+      return `<div class="voice-player-row" data-pid="${p.id}">
+        <div class="avatar ${speaking?'speaking-ring':''}" style="width:36px;height:36px;font-size:.9rem;background:${avatarColor(i)}">${p.avatar||initials(p.name)}</div>
+        <div style="flex:1;min-width:0">
+          <div class="voice-p-name">${p.name}${isMe?' (Kamu)':''}</div>
+          <div class="voice-p-sub">${!inVoice?'Tidak di voice':(speaking?'● Berbicara':(micOnState?'Mic Aktif':'Mic Mati'))}</div>
+        </div>
+        <div class="voice-p-mic">${!inVoice?'—':(micOnState?'🎙':'🔇')}</div>
+        ${(!isMe && peerEntry) ? `<input class="voice-p-vol" type="range" min="0" max="100" value="${volumePct}" oninput="Voice.setPeerVolume('${p.id}', this.value/100)"><button class="voice-mute-btn ${peerEntry.mutedByMe?'on':''}" onclick="Voice.toggleMutePeer('${p.id}')">${peerEntry.mutedByMe?'Unmute':'Mute'}</button>` : ''}
+      </div>`;
+    }).join('');
+  }
+};
+
+
+/* ---------- TAHAP 7: BOOT ---------- */
+window.addEventListener('DOMContentLoaded', ()=>{
+  loadSettings();
+  setupPWA();
+  setupFullscreenOption();
+  updateOnlineStatus();
+  initFromUrlOrSession();
+  const minSplash = new Promise(r=>setTimeout(r, 700));
+  minSplash.then(()=>{ const sp = document.getElementById('splash'); if(sp){ sp.classList.add('hide'); setTimeout(()=>sp.remove(), 400); } });
+});
+</script>
+</body>
+</html>
